@@ -19,6 +19,11 @@ It is modified from the original revelation.lua.
 
 * The unwanted clients can be excluded by rules. 
 
+##Screenshot
+
+[screenshot][screenshot.png]
+
+
 ## Use
 
 ### Installation
