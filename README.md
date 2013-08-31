@@ -4,14 +4,20 @@ Provides Mac OSX like 'Expose' view of all clients.
 It is modified from the original revelation.lua. 
 
 ##Changes from the original revelation
-* add support of multiple screens. Now the revelation will be trigged on
+* Support awesome 3.5 or later 
+
+* Add support of multiple screens. Now the revelation will be trigged on
   the on the multiple screens at the same time.
 
-* The way of select and active the client was changed. The previous
-movement by the keystroke "j,h,k,l" was deprecated and is replaced
-by the same way in the module hint.
+* The way of selecting and activing  the client was changed. Navigating
+  clients by the keys "j,h,k,l"  and then selecting the client by key "Enter" was
+  deprecated. Now the ways of selecting and activing is the same to the way in
+  the module hint.
 
+* Add zoom mode. Add the function of zooming the client by pressing the right
+  button of the mouse.
 
+* The unwanted clients can be excluded by rules. 
 
 ## Use
 
@@ -20,9 +26,11 @@ by the same way in the module hint.
 
  1. Clone repository:
 
-        git clone https://github.com/bioe007/awesome-revelation.git
+        git clone https://github.com/guotsuan/awesome-revelation.git
 
- 2. put near the top of your rc.lua `require("revelation")`
+ 2. put near the top of your rc.lua `local revelation=require("revelation")`
+
+ 3. put the revelation.init() after the beautiful.init()
 
  3. Make a global keybinding (ModKey + e) for revelation in your rc.lua:
 
@@ -43,12 +51,10 @@ by the same way in the module hint.
 
  4. Reload rc.lua and try the keybinding __Modkey + e__
 
- It should bring all clients to the current tag and set the layout to fair. You
- can focus clients with __cursor__ or __hjkl__ keys then press __Enter__ or
- press the mouse right button to select or __Escape__ to abort.
-
- This is a modification of the original awesome library that implemented
- expose like behavior.
+ It should bring all clients to the current tags on all screens and set the layout to fair.
+ You  can focus clients with __cursor__ then press the left button to select, or select by 
+pressing the keys shown in the hint boxs. Press the mouse right button to zoom the client 
+or __Escape__ to abort.
 
 ### Configuration
  Revelation's configuration is done through direct access to the module's
@@ -57,16 +63,17 @@ by the same way in the module hint.
  There are two basic settings, shown with default values:
 
     -- The name of the tag created for the 'exposed' view
-    revelation.config.tag_name = 'Revelation'
+    revelation_config.tag_name = 'Revelation'
 
     -- A table of matcher functions (used in client filtering)
-    revelation.match.exact = awful.rules.match
-    revelation.match.any   = awful.rules.match_any
+    revelation_match.exact = awful.rules.match
+    revelation_match.any   = awful.rules.match_any
 
  The rule matching functions must conform to `awful.rules.match` prototypes.
 
  For client matching rules, we follow the same syntax as awful.rules with one
  perk; if `rule.any == true`, then we call the `config.match.any` function.
+
 
 ### Examples
  All clients:
@@ -87,10 +94,16 @@ by the same way in the module hint.
                             })
             end)
 
+ To exclude the clients,  we set:
+
+     awful.key({modkey}, "e", function()
+             revelation({class="conky"}, is_excluded=true)
+             end)
 
 ## Credits
 
 ### Maintenance
+    * Quan Guo <guotsuan@gmail.com>
     * Perry Hargrave <resixian@gmail.com>
 
 ### Contributions, many thanks!
