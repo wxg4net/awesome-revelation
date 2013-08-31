@@ -30,7 +30,7 @@ It is modified from the original revelation.lua.
 
  2. put near the top of your rc.lua `local revelation=require("revelation")`
 
- 3. put the revelation.init() after the beautiful.init()
+ 3. put the `revelation.init()` after the `beautiful.init()`
 
  3. Make a global keybinding (ModKey + e) for revelation in your rc.lua:
 
