@@ -1,6 +1,17 @@
 # revelation.lua
 
-Provides Mac OSX like 'Expose' view of all clients.
+Provides Mac OSX like 'Expose' view of all clients. 
+It is modified from the original revelation.lua. 
+
+##Changes from the original revelation
+* add support of multiple screens. Now the revelation will be trigged on
+  the on the multiple screens at the same time.
+
+* The way of select and active the client was changed. The previous
+movement by the keystroke "j,h,k,l" was deprecated and is replaced
+by the same way in the module hint.
+
+
 
 ## Use
 
@@ -75,6 +86,7 @@ Provides Mac OSX like 'Expose' view of all clients.
                             any=true
                             })
             end)
+
 
 ## Credits
 
