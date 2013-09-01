@@ -3,7 +3,7 @@
 Provides Mac OSX like 'Expose' view of all clients. 
 It is modified from the original revelation.lua. 
 
-##Changes from the original revelation
+## Changes from the original revelation
 * Support awesome 3.5 or later 
 
 * Add support of multiple screens. Now the revelation will be trigged on
@@ -19,9 +19,9 @@ It is modified from the original revelation.lua.
 
 * The unwanted clients can be excluded by rules. 
 
-##Screenshot
+## Screenshot
 
-[screenshot][screenshot.png]
+![screenshot](./screenshot.png)
 
 
 ## Use
