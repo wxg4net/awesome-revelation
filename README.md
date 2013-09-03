@@ -1,19 +1,22 @@
 # revelation.lua
 
 Provides Mac OSX like 'Expose' view of all clients. 
+
 It is modified from the original revelation.lua. 
 
 ## Changes from the original revelation
 * Support awesome 3.5 or later 
 
-* Add support of multiple screens. Now the revelation will be trigged on
-  the on the multiple screens at the same time.
+* Add the support of multiple screens. Now multiple 'Expose' views will be shown 
+  on the multiple screens at the same time.
 
-* The way of selecting and activing  the client was changed. Navigating
-  clients by the keys "j,h,k,l"  and then selecting the client by key "Enter" was
-  deprecated. Now the ways of selecting and activing is the same to the way in
-  the module hint.
-
+* The way of selecting and focusing the client was changed. The old way that is
+  navigating clients by pressing the keys "j, h, k, l"  and then focusing the
+  client by pressing key "Enter" was deprecated. Now each client in the 'Expose'
+  views come with a hint box with a letter, you can select and focus the client
+  by pressing the corresponding letter.  This method including codes was copied from the [module
+  hint](https://github.com/zackpete/hints). 
+  
 * Add zoom mode. Add the function of zooming the client by pressing the right
   button of the mouse.
 
