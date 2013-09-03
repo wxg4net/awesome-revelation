@@ -60,8 +60,9 @@ It is modified from the original revelation.lua.
  4. Reload rc.lua and try the keybinding __Modkey + e__
 
  It should bring all clients to the current tags on all screens and set the layout to fair.
- You  can focus clients with __cursor__ then press the left button to select, or select by 
-pressing the keys shown in the hint boxs. Press the mouse right button to zoom the client 
+ You  can focus clients with __cursor__ then press the __left__ button to select, or you can 
+direct focus on the client by pressing the corresponding key shown in the hint box. 
+Press the mouse right button to zoom the client 
 or __Escape__ to abort.
 
 ### Configuration
