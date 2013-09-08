@@ -62,6 +62,7 @@ local function selectfn(restore)
         awful.tag.viewonly(c:tags()[1], c.screen)
         -- Focus and raise
         capi.client.focus = c
+        awful.screen.focus(c.screen)
         c:raise()
     end
 end
