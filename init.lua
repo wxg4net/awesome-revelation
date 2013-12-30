@@ -35,7 +35,7 @@ local clientData = {} -- table that holds the positions and sizes of floating cl
 charorder = "jkluiopyhnmfdsatgvcewqzx1234567890"
 hintbox = {} -- Table of letter wiboxes with characters as the keys
 
-local default_config = {
+revelation = {
     -- Name of expose tag.
     tag_name = "Revelation",
 
@@ -50,7 +50,6 @@ local default_config = {
     },
 }
 
-local config = revelation_config or default_config
 
 -- Executed when user selects a client from expose view.
 --
@@ -72,7 +71,7 @@ end
 -- @param clients A table of clients to check.
 -- @param t The tag to give matching clients.
 local function match_clients(rule, clients, t, is_exluded)
-    local mfc = rule.any and config.match.any or config.match.exact
+    local mfc = rule.any and revelation.match.any or revelation.match.exact
     local mf = is_exluded and function(c,rule) return not mfc(c,rule) end or mfc 
     for _, c in pairs(clients) do
         if mf(c, rule) then
@@ -126,21 +125,29 @@ end
 -- @param rule A table with key and value to match. [{class=""}]
 
 
-function revelation.expose(rule, is_exluded)
+function revelation.expose(rule, is_exluded, curr_tag_only)
     local rule = rule or {class=""}
     local t={}
     local zt={}
+    local curr_tag_only = curr_tag_only or false
 
     for scr=1,capi.screen.count() do
-        t[scr] = awful.tag.new({config.tag_name},
+
+        t[scr] = awful.tag.new({revelation.tag_name},
         scr,
         awful.layout.suit.fair)[1]
-        zt[scr] = awful.tag.new({config.tag_name.."_zoom"},
+        zt[scr] = awful.tag.new({revelation.tag_name.."_zoom"},
         scr,
         awful.layout.suit.fair)[1]
 
+
+        if curr_tag_only then 
+            match_clients(rule, awful.client.visible(scr), t[scr], is_exluded)
+        else
+            match_clients(rule, capi.client.get(scr), t[scr], is_exluded)
+        end
+
         awful.tag.viewonly(t[scr], t.screen)
-        match_clients(rule, capi.client.get(scr), t[scr], is_exluded)
     end 
 
 
@@ -260,6 +267,16 @@ function revelation.init()
     hintsize = 60
     local fontcolor = beautiful.fg_normal
     local letterbox = {}
+
+    local args = args or {}
+
+    revelation.tag_name = args.tag_name or revelation.tag_name
+    if args.match then 
+        revelation.match.exact = args.match.exact or revelation.match.exact
+        revelation.match.any = args.match.exact or revelation.match.any
+    end
+
+
     for i = 1, #charorder do
         local char = charorder:sub(i,i)
         hintbox[char] = wibox({fg=beautiful.fg_normal, bg=beautiful.bg_focus, border_color=beautiful.border_focus, border_width=beautiful.border_width})
