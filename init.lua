@@ -70,9 +70,9 @@ end
 -- @param rule The rule. Conforms to awful.rules syntax.
 -- @param clients A table of clients to check.
 -- @param t The tag to give matching clients.
-local function match_clients(rule, clients, t, is_exluded)
+local function match_clients(rule, clients, t, is_excluded)
     local mfc = rule.any and revelation.match.any or revelation.match.exact
-    local mf = is_exluded and function(c,rule) return not mfc(c,rule) end or mfc 
+    local mf = is_excluded and function(c,rule) return not mfc(c,rule) end or mfc 
     for _, c in pairs(clients) do
         if mf(c, rule) then
             -- Store geometry before setting their tags
@@ -125,11 +125,13 @@ end
 -- @param rule A table with key and value to match. [{class=""}]
 
 
-function revelation.expose(rule, is_exluded, curr_tag_only)
-    local rule = rule or {class=""}
+function revelation.expose(args)
+    local rule = args.rule or {}
+    local is_excluded = args.is_excluded or false
+    local curr_tag_only = args.curr_tag_only or false
+
     local t={}
     local zt={}
-    local curr_tag_only = curr_tag_only or false
 
     for scr=1,capi.screen.count() do
 
@@ -142,9 +144,9 @@ function revelation.expose(rule, is_exluded, curr_tag_only)
 
 
         if curr_tag_only then 
-            match_clients(rule, awful.client.visible(scr), t[scr], is_exluded)
+            match_clients(rule, awful.client.visible(scr), t[scr], is_excluded)
         else
-            match_clients(rule, capi.client.get(scr), t[scr], is_exluded)
+            match_clients(rule, capi.client.get(scr), t[scr], is_excluded)
         end
 
         awful.tag.viewonly(t[scr], t.screen)
