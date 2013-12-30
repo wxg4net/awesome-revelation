@@ -48,6 +48,7 @@ revelation = {
         exact = aw_rules.match,
         any   = aw_rules.match_any
     },
+    tags_data = {}
 }
 
 
@@ -88,37 +89,6 @@ local function match_clients(rule, clients, t, is_excluded)
     return clients
 end
 
--- Arrow keys and 'hjkl' move focus, Return selects, Escape cancels. Ignores
--- modifiers. was deprecated by gq in favor of hintbox
---
--- @param restore a function to call if the user presses escape
--- @return keyboardhandler
-local function keyboardhandler (restore)
-    return function (mod, key, event)
-
-    if event == "release" then return true end
-
-    if hintindex[key] then 
-        selectfn(restore)(hintindex[key])
-
-        for i,j in pairs(hintindex) do
-            hintbox[i].visible = false
-        end
-        return false
-    end 
-
-    if key == "Escape" then
-        for i,j in pairs(hintindex) do
-            hintbox[i].visible = false
-        end
-        restore()
-
-        return false
-    end
-
-    return true
-    end
-end
 
 -- Implement Exposé (ala Mac OS X).
 --
@@ -132,8 +102,19 @@ function revelation.expose(args)
 
     local t={}
     local zt={}
+    local ac_status={}
+
 
     for scr=1,capi.screen.count() do
+
+        all_tags = awful.tag.gettags(scr)
+
+        ac_status={}
+        for k,v in pairs(all_tags) do
+            ac_status[v] = v.activated 
+            --debuginfo(v)
+        end
+        revelation.tags_data[scr] = ac_status
 
         t[scr] = awful.tag.new({revelation.tag_name},
         scr,
@@ -149,6 +130,10 @@ function revelation.expose(args)
             match_clients(rule, capi.client.get(scr), t[scr], is_excluded)
         end
 
+        for k,v in pairs(all_tags) do
+             v.activated =false
+            --debuginfo(v)
+        end
         awful.tag.viewonly(t[scr], t.screen)
     end 
 
@@ -177,6 +162,14 @@ function revelation.expose(args)
         for scr=1, capi.screen.count() do
             t[scr].activated = false
             zt[scr].activated = false
+
+            --all_tags = awful.tag.gettags(scr)
+            status = revelation.tags_data[scr]
+
+            for k,v in pairs(status) do
+                 k.activated = v
+                --debuginfo(v)
+            end
         end
 
         for scr=1, capi.screen.count() do
@@ -187,6 +180,10 @@ function revelation.expose(args)
                     awful.client.floating.set(c, true)
                 end
             end
+        end
+
+        for i,j in pairs(hintindex) do
+            hintbox[i].visible = false
         end
     end
 
@@ -293,6 +290,9 @@ function revelation.init()
     end
 end
 
+local function debuginfo( message )
+    nid = naughty.notify({ text = message, timeout = 10 })
+end
 setmetatable(revelation, { __call = function(_, ...) return revelation.expose(...) end })
 
 return revelation
