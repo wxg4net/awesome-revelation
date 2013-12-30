@@ -4,6 +4,16 @@ Provides Mac OSX like 'Expose' view of all clients.
 
 It is modified from the original revelation.lua. 
 
+## Changes after 2013-12-30
+* now it is possible in revelation.init({...}) to change the default settings of 
+  revelation module.
+
+* revelation(...) now accept the paramster as table. to add specify rules 
+  revelation({rule={...}, is_excluded=true or false, curr_tag_only = ture or 
+  false)
+  when curr_tag_only is true, the module only collect the cliens from current
+  tags.
+
 ## Changes from the original revelation
 * Support awesome 3.5 or later 
 
@@ -66,22 +76,25 @@ Press the mouse right button to zoom the client
 or __Escape__ to abort.
 
 ### Configuration
- Revelation's configuration is done through direct access to the module's
- `config` table.
-
+ Revelation's configuration is done through the init() function
+ 
  There are two basic settings, shown with default values:
 
     -- The name of the tag created for the 'exposed' view
-    revelation_config.tag_name = 'Revelation'
+    revelation.tag_name = 'Revelation'
 
     -- A table of matcher functions (used in client filtering)
-    revelation_match.exact = awful.rules.match
-    revelation_match.any   = awful.rules.match_any
+    revelation.exact = awful.rules.match
+    revelation.any   = awful.rules.match_any
 
  The rule matching functions must conform to `awful.rules.match` prototypes.
 
  For client matching rules, we follow the same syntax as awful.rules with one
  perk; if `rule.any == true`, then we call the `config.match.any` function.
+
+to change the settings, use:
+
+     revelation.init({tag_name = ..., match={...})
 
 
 ### Examples
@@ -92,22 +105,29 @@ or __Escape__ to abort.
  To match all urxvt terminals:
 
      awful.key({modkey}, "e", function()
-                revelation({class="URxvt"})
+                revelation({rule={class="URxvt"}})
              end)
  To match clients with class 'foo' or 'bar':
 
      awful.key({modkey}, "e", function()
                 revelation({
-                            class={"foo", "bar"},
-                            any=true
+                            rule{class={"foo", "bar"},
+                            any=true}
                             })
             end)
 
  To exclude the clients,  we set:
 
      awful.key({modkey}, "e", function()
-             revelation({class="conky"}, is_excluded=true)
+             revelation(rule={class="conky"}, is_excluded=true)
              end)
+
+ To set only collect clients from current tag
+
+     awful.key({modkey}, "e", function()
+                 revelation(rule={class="conky"}, is_excluded=true, 
+                curr_tag_only=true)
+                 end)
 
 ## Credits
 
