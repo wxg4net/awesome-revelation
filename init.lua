@@ -96,6 +96,7 @@ end
 
 
 function revelation.expose(args)
+    local args = args or {}
     local rule = args.rule or {}
     local is_excluded = args.is_excluded or false
     local curr_tag_only = args.curr_tag_only or false
