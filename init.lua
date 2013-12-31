@@ -154,6 +154,12 @@ function revelation.expose(args)
 
     local function restore()
         for scr=1, capi.screen.count() do
+            status = revelation.tags_data[scr]
+
+            for k,v in pairs(status) do
+                 k.activated = v
+                --debuginfo(v)
+            end
             awful.tag.history.restore(scr)
             t[scr].screen = nil
             --zt[scr].screen = nil
@@ -164,13 +170,6 @@ function revelation.expose(args)
             t[scr].activated = false
             zt[scr].activated = false
 
-            --all_tags = awful.tag.gettags(scr)
-            status = revelation.tags_data[scr]
-
-            for k,v in pairs(status) do
-                 k.activated = v
-                --debuginfo(v)
-            end
         end
 
         for scr=1, capi.screen.count() do
