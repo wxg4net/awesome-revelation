@@ -48,7 +48,7 @@ revelation = {
         exact = aw_rules.match,
         any   = aw_rules.match_any
     },
-    tags_data = {}
+    tags_data = {},
 }
 
 
@@ -110,13 +110,6 @@ function revelation.expose(args)
 
         all_tags = awful.tag.gettags(scr)
 
-        ac_status={}
-        for k,v in pairs(all_tags) do
-            ac_status[v] = v.activated 
-            --debuginfo(v)
-        end
-        revelation.tags_data[scr] = ac_status
-
         t[scr] = awful.tag.new({revelation.tag_name},
         scr,
         awful.layout.suit.fair)[1]
@@ -131,10 +124,6 @@ function revelation.expose(args)
             match_clients(rule, capi.client.get(scr), t[scr], is_excluded)
         end
 
-        for k,v in pairs(all_tags) do
-             v.activated =false
-            --debuginfo(v)
-        end
         awful.tag.viewonly(t[scr], t.screen)
     end 
 
@@ -156,21 +145,12 @@ function revelation.expose(args)
         for scr=1, capi.screen.count() do
             awful.tag.history.restore(scr)
             t[scr].screen = nil
-            --zt[scr].screen = nil
         end
         capi.keygrabber.stop()
         capi.mousegrabber.stop()
         for scr=1, capi.screen.count() do
             t[scr].activated = false
             zt[scr].activated = false
-
-            --all_tags = awful.tag.gettags(scr)
-            status = revelation.tags_data[scr]
-
-            for k,v in pairs(status) do
-                 k.activated = v
-                --debuginfo(v)
-            end
         end
 
         for scr=1, capi.screen.count() do
@@ -186,6 +166,7 @@ function revelation.expose(args)
         for i,j in pairs(hintindex) do
             hintbox[i].visible = false
         end
+
     end
 
     capi.keygrabber.run(function (mod, key, event)
@@ -251,10 +232,6 @@ function revelation.expose(args)
             end
         end
 
-
-        --for i,j in pairs(hintindex) do
-            --hintbox[i].visible = false
-        --end
         return true
         --Strange but on my machine only fleur worked as a string.
         --stole it from
