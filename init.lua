@@ -103,7 +103,6 @@ function revelation.expose(args)
 
     local t={}
     local zt={}
-    local ac_status={}
 
 
     for scr=1,capi.screen.count() do
