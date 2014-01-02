@@ -2,16 +2,21 @@
 
 Provides Mac OSX like 'Expose' view of all clients. 
 
-It is modified from the original revelation.lua. 
+This is a fork from [revelation](https://github.com/bioe007/awesome-revelation)
+It is modified from the original revelation.lua for incorperating with awesome 3.5 or later. 
+It also have some features.  
 
 ## Changes after 2013-12-30
-* now it is possible in revelation.init({...}) to change the default settings of 
+* Now it is possible, in revelation.init({...}), to change the default settings of 
   revelation module.
 
-* revelation(...) now accept the paramster as table. to add specify rules 
-  revelation({rule={...}, is_excluded=true or false, curr_tag_only = ture or 
-  false)
-  when curr_tag_only is true, the module only collect the cliens from current
+* Function `revelation(...)` now accept the parameter as a table `{rule={...}, is_excluded=...,
+curr_tag_only=...}`. 
+
+1. To add specify rules `revelation({rule={...},...})`.
+2. To exclude the clients matched by the rules instead of including `revelation({rule={...}, 
+is_excluded=true})`.
+3. `{...,curr_tag_only=true}` make the revelation only collect the cliens from current
   tags.
 
 ## Changes from the original revelation
@@ -21,16 +26,16 @@ It is modified from the original revelation.lua.
   on the multiple screens at the same time.
 
 * The way of selecting and focusing the client was changed. The old way that is
-  navigating clients by pressing the keys "j, h, k, l"  and then focusing the
+  navigating clients by pressing the keys "j, h, k, l"  and then selecting the
   client by pressing key "Enter" was deprecated. Now each client in the 'Expose'
-  views come with a hint box with a letter, you can select and focus the client
-  by pressing the corresponding letter.  This method including codes was copied from the [module
-  hint](https://github.com/zackpete/hints). 
+  views come with a letter surrounding by a hint box, you can select the client
+  by pressing the corresponding letter in the hint box.  The iead and codes of this method
+  was copied from the module [hint](https://github.com/zackpete/hints). 
   
 * Add zoom mode. Add the function of zooming the client by pressing the right
   button of the mouse.
 
-* The unwanted clients can be excluded by rules. 
+* The unwanted clients can be excluded by the parameter`{rule={...}....}`. 
 
 ## Screenshot
 
@@ -89,8 +94,8 @@ or __Escape__ to abort.
 
  The rule matching functions must conform to `awful.rules.match` prototypes.
 
- For client matching rules, we follow the same syntax as awful.rules with one
- perk; if `rule.any == true`, then we call the `config.match.any` function.
+ For client matching rules, we follow the same syntax as awful.rules expects.
+ If `rule.any == true`, then we call the `config.match.any` function.
 
 to change the settings, use:
 
@@ -142,7 +147,6 @@ to change the settings, use:
     * Espen Wiborg <espenhw@grumblesmurf.org>
     * Julien Danjou <julien@danjou.info>
 
-## License
-    Revelation is released under the GNU General Public License, version 3.
+    (c) 20013-2014 Quan Guo
     (c) 2009-12 Perry Hargrave
     (c) 2008 Espen Wiborg, Julien Danjou
