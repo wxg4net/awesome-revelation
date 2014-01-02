@@ -48,7 +48,7 @@ revelation = {
         exact = aw_rules.match,
         any   = aw_rules.match_any
     },
-    tags_data = {}
+    tags_status = {}
 }
 
 
@@ -103,19 +103,21 @@ function revelation.expose(args)
 
     local t={}
     local zt={}
-    local ac_status={}
+    local tags_status
+    local k,v
 
 
     for scr=1,capi.screen.count() do
 
         all_tags = awful.tag.gettags(scr)
 
-        ac_status={}
+        tags_status={}
+        local k,v
         for k,v in pairs(all_tags) do
-            ac_status[v] = v.activated 
+            tags_status[v] = v.activated 
             --debuginfo(v)
         end
-        revelation.tags_data[scr] = ac_status
+        revelation.tags_status[scr] = tags_status
 
         t[scr] = awful.tag.new({revelation.tag_name},
         scr,
@@ -154,9 +156,7 @@ function revelation.expose(args)
 
     local function restore()
         for scr=1, capi.screen.count() do
-            status = revelation.tags_data[scr]
-
-            for k,v in pairs(status) do
+            for k,v in pairs(revelation.tags_status[scr]) do
                  k.activated = v
                 --debuginfo(v)
             end
