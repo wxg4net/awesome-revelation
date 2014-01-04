@@ -48,7 +48,19 @@ revelation = {
         exact = aw_rules.match,
         any   = aw_rules.match_any
     },
-    tags_status = {}
+    property_to_watch={
+        minimized            = false,
+        fullscreen           = false,
+        maximized_horizontal = false,
+        maximized_vertical   = false,
+        sticky               = false,
+        ontop                = false,
+        above                = false,
+        below                = false,
+    },
+    tags_status = {},
+    is_excluded = false,
+    curr_tag_only = false
 }
 
 
@@ -74,16 +86,27 @@ end
 local function match_clients(rule, clients, t, is_excluded)
     local mfc = rule.any and revelation.match.any or revelation.match.exact
     local mf = is_excluded and function(c,rule) return not mfc(c,rule) end or mfc 
+    local k,v, flt
     for _, c in pairs(clients) do
         if mf(c, rule) then
             -- Store geometry before setting their tags
-            if awful.client.floating.get(c) then
-                clientData[c] = c:geometry()
-                awful.client.floating.set(c, false)
+            clientData[c] = {}
+            if awful.client.floating.get(c) then 
+                clientData[c]["geometry"] = c:geometry()
+                flt = awful.client.property.get(c, "floating") 
+                if flt ~= nil then 
+                    clientData[c]["floating"] = flt
+                    awful.client.property.set(c, "floating", false) 
+                end
+
             end
 
+            for k,v in pairs(revelation.property_to_watch) do
+                clientData[c][k] = c[k]
+                c[k] = v
+                
+            end
             awful.client.toggletag(t, c)
-            c.minimized = false
         end
     end
     return clients
@@ -100,6 +123,9 @@ function revelation.expose(args)
     local rule = args.rule or {}
     local is_excluded = args.is_excluded or false
     local curr_tag_only = args.curr_tag_only or false
+
+    revelation.is_excluded = is_excluded
+    revelation.curr_tag_only = curr_tag_only
 
     local t={}
     local zt={}
@@ -155,6 +181,7 @@ function revelation.expose(args)
     end
 
     local function restore()
+        local k,v
         for scr=1, capi.screen.count() do
             for k,v in pairs(revelation.tags_status[scr]) do
                  k.activated = v
@@ -172,12 +199,27 @@ function revelation.expose(args)
 
         end
 
+        local clients
         for scr=1, capi.screen.count() do
-            for _, c in pairs(capi.client.get(scr)) do
-                if clientData[c] then
-                    c:geometry(clientData[c]) -- Restore positions and sizes
+            if revelation.curr_tag_only then 
+                clients = awful.client.visible(scr)
+            else
+                clients = capi.client.get(scr)
+            end
 
-                    awful.client.floating.set(c, true)
+            for _, c in pairs(clients) do
+                if clientData[c] then
+                    for k,v in pairs(clientData[c]) do 
+                        if v ~= nil then 
+                            if k== "geometry" then
+                                c:geometry(v)
+                            elseif k == "floating" then
+                                awful.client.property.set(c, "floating", v) 
+                            else
+                                c[k]=v
+                            end
+                        end
+                    end
                 end
             end
         end
@@ -291,7 +333,14 @@ function revelation.init()
 end
 
 local function debuginfo( message )
-    nid = naughty.notify({ text = message, timeout = 10 })
+
+    mm = message
+
+    if not message then
+        mm = "false"
+    end
+
+    nid = naughty.notify({ text = tostring(mm), timeout = 10 })
 end
 setmetatable(revelation, { __call = function(_, ...) return revelation.expose(...) end })
 
