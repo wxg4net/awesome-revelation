@@ -304,7 +304,7 @@ function revelation.expose(args)
 end
 
 -- Create the wiboxes, but don't show them
-function revelation.init()
+function revelation.init(arg)
     hintsize = 60
     local fontcolor = beautiful.fg_normal
     local letterbox = {}
@@ -314,7 +314,7 @@ function revelation.init()
     revelation.tag_name = args.tag_name or revelation.tag_name
     if args.match then 
         revelation.match.exact = args.match.exact or revelation.match.exact
-        revelation.match.any = args.match.exact or revelation.match.any
+        revelation.match.any = args.match.any or revelation.match.any
     end
 
 
