@@ -73,6 +73,9 @@ local function selectfn(restore)
         -- Pop to client tag
         awful.tag.viewonly(c:tags()[1], c.screen)
         -- Focus and raise
+        if c.minimized then
+            c.minimized = false
+        end
         capi.client.focus = c
         awful.screen.focus(c.screen)
         c:raise()
