@@ -307,7 +307,7 @@ function revelation.expose(args)
 end
 
 -- Create the wiboxes, but don't show them
-function revelation.init(arg)
+function revelation.init(args)
     hintsize = 60
     local fontcolor = beautiful.fg_normal
     local letterbox = {}
