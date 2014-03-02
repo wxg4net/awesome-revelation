@@ -132,21 +132,11 @@ function revelation.expose(args)
 
     local t={}
     local zt={}
-    local tags_status
-    local k,v
 
 
     for scr=1,capi.screen.count() do
 
         all_tags = awful.tag.gettags(scr)
-
-        tags_status={}
-        local k,v
-        for k,v in pairs(all_tags) do
-            tags_status[v] = v.activated 
-            --debuginfo(v)
-        end
-        revelation.tags_status[scr] = tags_status
 
         t[scr] = awful.tag.new({revelation.tag_name},
         scr,
@@ -162,10 +152,6 @@ function revelation.expose(args)
             match_clients(rule, capi.client.get(scr), t[scr], is_excluded)
         end
 
-        for k,v in pairs(all_tags) do
-             v.activated =false
-            --debuginfo(v)
-        end
         awful.tag.viewonly(t[scr], t.screen)
     end 
 
@@ -186,20 +172,14 @@ function revelation.expose(args)
     local function restore()
         local k,v
         for scr=1, capi.screen.count() do
-            for k,v in pairs(revelation.tags_status[scr]) do
-                 k.activated = v
-                --debuginfo(v)
-            end
             awful.tag.history.restore(scr)
             t[scr].screen = nil
-            --zt[scr].screen = nil
         end
         capi.keygrabber.stop()
         capi.mousegrabber.stop()
         for scr=1, capi.screen.count() do
             t[scr].activated = false
             zt[scr].activated = false
-
         end
 
         local clients
@@ -230,14 +210,48 @@ function revelation.expose(args)
         for i,j in pairs(hintindex) do
             hintbox[i].visible = false
         end
+
     end
 
+    local zoomed = false
+    local zoomedClient = nil
+    local keyPressed = false
+
     capi.keygrabber.run(function (mod, key, event)
+        local c = nil
+        local keyPressed = false
+
         if event == "release" then return true end
+            
+        --if awful.util.table.hasitem(mod, "Shift") then
+            --debuginfo("dogx")
+            --debuginfo(string.lower(key))
+        --end
+            
+        if awful.util.table.hasitem(mod, "Shift") then
+            if keyPressed then
+                keyPressed = false
+            else
+                c = hintindex[string.lower(key)]
+                if not zoomed and c ~= nil then
+                    awful.tag.viewonly(zt[capi.mouse.screen], capi.mouse.screen)
+                    awful.client.toggletag(zt[capi.mouse.screen], c)
+                    zoomedClient = c
+                    zoomed = true
+                elseif zoomedClient ~= nil then
+                    awful.tag.history.restore(capi.mouse.screen)
+                    awful.client.toggletag(zt[capi.mouse.screen], zoomedClient)
+                    zoomedClient = nil
+                    zoomed = false 
+                end
+            end
+        end
 
         if hintindex[key] then 
             --client.focus = hintindex[key]
             --hintindex[key]:raise()
+            
+
             selectfn(restore)(hintindex[key])
 
             for i,j in pairs(hintindex) do
@@ -261,8 +275,6 @@ function revelation.expose(args)
 
     local pressedMiddle = false
     local pressedRight = false
-    local zoomed = false
-    local zoomedClient = nil
 
     capi.mousegrabber.run(function(mouse)
         local c = awful.mouse.client_under_pointer()
@@ -295,10 +307,6 @@ function revelation.expose(args)
             end
         end
 
-
-        --for i,j in pairs(hintindex) do
-            --hintbox[i].visible = false
-        --end
         return true
         --Strange but on my machine only fleur worked as a string.
         --stole it from
@@ -307,6 +315,7 @@ function revelation.expose(args)
 end
 
 -- Create the wiboxes, but don't show them
+--
 function revelation.init(args)
     hintsize = 60
     local fontcolor = beautiful.fg_normal
