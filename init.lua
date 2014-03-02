@@ -213,12 +213,45 @@ function revelation.expose(args)
 
     end
 
+    local zoomed = false
+    local zoomedClient = nil
+    local keyPressed = false
+
     capi.keygrabber.run(function (mod, key, event)
+        local c = nil
+        local keyPressed = false
+
         if event == "release" then return true end
+            
+        --if awful.util.table.hasitem(mod, "Shift") then
+            --debuginfo("dogx")
+            --debuginfo(string.lower(key))
+        --end
+            
+        if awful.util.table.hasitem(mod, "Shift") then
+            if keyPressed then
+                keyPressed = false
+            else
+                c = hintindex[string.lower(key)]
+                if not zoomed and c ~= nil then
+                    awful.tag.viewonly(zt[capi.mouse.screen], capi.mouse.screen)
+                    awful.client.toggletag(zt[capi.mouse.screen], c)
+                    zoomedClient = c
+                    zoomed = true
+                elseif zoomedClient ~= nil then
+                    awful.tag.history.restore(capi.mouse.screen)
+                    awful.client.toggletag(zt[capi.mouse.screen], zoomedClient)
+                    zoomedClient = nil
+                    zoomed = false 
+                end
+            end
+        end
 
         if hintindex[key] then 
             --client.focus = hintindex[key]
             --hintindex[key]:raise()
+            
+
             selectfn(restore)(hintindex[key])
 
             for i,j in pairs(hintindex) do
@@ -242,8 +275,6 @@ function revelation.expose(args)
 
     local pressedMiddle = false
     local pressedRight = false
-    local zoomed = false
-    local zoomedClient = nil
 
     capi.mousegrabber.run(function(mouse)
         local c = awful.mouse.client_under_pointer()
