@@ -50,21 +50,22 @@ is_excluded=true})`.
 ### Installation
  (From user's awesome configuration directory, usually ~/.config/awesome)
 
- 1. Clone repository:
+ 1. Clone the repository:
 
         git clone https://github.com/guotsuan/awesome-revelation revelation
 
- 2. put near the top of your rc.lua `local revelation=require("revelation")`
+ 2. Include it at the top of your rc.lua file:
+    `local revelation=require("revelation")`
 
- 3. put the `revelation.init()` after the `beautiful.init()`
+ 3. Add `revelation.init()` after `beautiful.init()`
 
- 3. Make a global keybinding (ModKey + e) for revelation in your rc.lua:
+ 3. Define a global keybinding (e. g. `ModKey + e`) for revelation in your rc.lua:
 
         globalkeys = awful.util.table.join(
         awful.key({ modkey,           }, "Left",   awful.tag.viewprev       ), 
         awful.key({ modkey,           }, "Right",  awful.tag.viewnext       ),
         awful.key({ modkey,           }, "Escape", awful.tag.history.restore),
-        awful.key({ modkey}, "e", revelation),  -- Insert this line
+    ==> awful.key({ modkey,           }, "e",      revelation),
 
         awful.key({ modkey,           }, "j",
         function ()
@@ -72,16 +73,15 @@ is_excluded=true})`.
             if client.focus then client.focus:raise() end
         end),
 
-    **NOTE:** Always double check this key binding syntax against the version of
-    Awesome that you are using.
+    **NOTE:** Always double check the key binding syntax against the version of
+    Awesome which you are using.
 
- 4. Reload rc.lua and try the keybinding __Modkey + e__
+ 4. Restart Awesome (usually __Modkey + Control + r__) and try the keybinding __Modkey + e__.
 
- It should bring all clients to the current tags on all screens and set the layout to fair.
- You  can focus clients with __cursor__ then press the __left__ button to select, or you can 
-direct focus on the client by pressing the corresponding key shown in the hint box. 
-Press the mouse right button to zoom the client 
-or __Escape__ to abort.
+ It should bring up all clients from the current tags on all screens and set the layout to fair.
+ You can focus clients with the __cursor__ keys, and then press the __left__ button to select,
+ or you can directly focus a client by pressing the corresponding key shown in the hint box.
+ Press the right mouse button to zoom the client or __Escape__ to abort.
 
 ### Configuration
  Revelation's configuration is done through the init() function
