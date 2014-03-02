@@ -52,7 +52,7 @@ is_excluded=true})`.
 
  1. Clone repository:
 
-        git clone https://github.com/guotsuan/awesome-revelation.git
+        git clone https://github.com/guotsuan/awesome-revelation revelation
 
  2. put near the top of your rc.lua `local revelation=require("revelation")`
 
