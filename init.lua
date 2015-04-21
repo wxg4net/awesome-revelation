@@ -161,12 +161,14 @@ function revelation.expose(args)
     for i,thisclient in pairs(clientlist) do 
         -- Move wiboxes to center of visible windows and populate hintindex
         local char = charorder:sub(i,i)
-        hintindex[char] = thisclient
-        local geom = thisclient.geometry(thisclient)
-        hintbox[char].visible = true
-        hintbox[char].x = geom.x + geom.width/2 - hintsize/2
-        hintbox[char].y = geom.y + geom.height/2 - hintsize/2
-        hintbox[char].screen = thisclient.screen
+        if char and char ~= '' then
+            hintindex[char] = thisclient
+            local geom = thisclient.geometry(thisclient)
+            hintbox[char].visible = true
+            hintbox[char].x = geom.x + geom.width/2 - hintsize/2
+            hintbox[char].y = geom.y + geom.height/2 - hintsize/2
+            hintbox[char].screen = thisclient.screen
+        end
     end
 
     local function restore()
