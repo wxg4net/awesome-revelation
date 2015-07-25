@@ -19,6 +19,7 @@ local pairs        = pairs
 local setmetatable = setmetatable
 local naughty      = require("naughty")
 local table        = table
+local clock        = os.clock
 local tostring     = tostring
 local capi         = {
     tag            = tag,
@@ -156,18 +157,30 @@ function revelation.expose(args)
     end 
 
 
+
+    -- this timer is used to want the the geometry of clients are recalcuated.
+    -- if timeout = 0.0, it consumes cpu, timeout = 0.001 is good enough.
+    --
+    local block_timer = timer({ timeout = 0.001 })
+    
     local hintindex = {} -- Table of visible clients with the hint letter as the keys
     local clientlist = awful.client.visible()
-    for i,thisclient in pairs(clientlist) do 
-        -- Move wiboxes to center of visible windows and populate hintindex
-        local char = charorder:sub(i,i)
-        hintindex[char] = thisclient
-        local geom = thisclient.geometry(thisclient)
-        hintbox[char].visible = true
-        hintbox[char].x = geom.x + geom.width/2 - hintsize/2
-        hintbox[char].y = geom.y + geom.height/2 - hintsize/2
-        hintbox[char].screen = thisclient.screen
-    end
+
+    block_timer:connect_signal("timeout", function () 
+        for i,thisclient in pairs(clientlist) do 
+            -- Move wiboxes to center of visible windows and populate hintindex
+            local char = charorder:sub(i,i)
+            hintindex[char] = thisclient
+            hintbox[char].visible = true
+            local geom = thisclient.geometry(thisclient)
+            hintbox[char].x = geom.x + geom.width/2 - hintsize/2
+            hintbox[char].y = geom.y + geom.height/2 - hintsize/2
+            hintbox[char].screen = thisclient.screen
+        end
+    end)
+
+    block_timer:start()
+
 
     local function restore()
         local k,v
@@ -175,8 +188,10 @@ function revelation.expose(args)
             awful.tag.history.restore(scr)
             t[scr].screen = nil
         end
+        block_timer:stop()
         capi.keygrabber.stop()
         capi.mousegrabber.stop()
+        
         for scr=1, capi.screen.count() do
             t[scr].activated = false
             zt[scr].activated = false
@@ -312,6 +327,7 @@ function revelation.expose(args)
         --stole it from
         --https://github.com/Elv13/awesome-configs/blob/master/widgets/layout/desktopLayout.lua#L175
     end,"fleur")
+
 end
 
 -- Create the wiboxes, but don't show them
