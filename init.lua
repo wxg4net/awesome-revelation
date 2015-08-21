@@ -321,7 +321,7 @@ end
 -- Create the wiboxes, but don't show them
 
 function revelation.init(args)
-    hintsize = 60
+    hintsize = beautiful.xresources.apply_dpi(50)
     local fontcolor = revelation.fg
     local letterbox = {}
 
