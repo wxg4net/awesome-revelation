@@ -28,6 +28,7 @@ local capi         = {
     mouse          = mouse,
     screen         = screen
 }
+local delayed_call = require("gears.timer").delayed_call
 
 local revelation ={}
 local clientData = {} -- table that holds the positions and sizes of floating clients
@@ -60,7 +61,9 @@ revelation = {
     },
     tags_status = {},
     is_excluded = false,
-    curr_tag_only = false
+    curr_tag_only = false,
+    font = "monospace 20",
+    fg = beautiful.fg_normal
 }
 
 
@@ -151,8 +154,10 @@ function revelation.expose(args)
 
         awful.tag.viewonly(t[scr], t.screen)
     end
+    delayed_call(function() expose_callback(t, zt) end)
+end
 
-
+function expose_callback(t, zt)
     local hintindex = {} -- Table of visible clients with the hint letter as the keys
     local clientlist = awful.client.visible()
     for i,thisclient in pairs(clientlist) do
@@ -160,10 +165,10 @@ function revelation.expose(args)
         local char = charorder:sub(i,i)
         if char and char ~= '' then
             hintindex[char] = thisclient
-            local geom = thisclient.geometry(thisclient)
+            local geom = thisclient:geometry()
             hintbox[char].visible = true
-            hintbox[char].x = geom.x + geom.width/2 - hintsize/2
-            hintbox[char].y = geom.y + geom.height/2 - hintsize/2
+            hintbox[char].x = math.floor(geom.x + geom.width/2 - hintsize/2)
+            hintbox[char].y = math.floor(geom.y + geom.height/2 - hintsize/2)
             hintbox[char].screen = thisclient.screen
         end
     end
@@ -317,7 +322,7 @@ end
 
 function revelation.init(args)
     hintsize = 60
-    local fontcolor = beautiful.fg_normal
+    local fontcolor = revelation.fg
     local letterbox = {}
 
     local args = args or {}
@@ -336,8 +341,12 @@ function revelation.init(args)
         hintbox[char].width = hintsize
         hintbox[char].height = hintsize
         letterbox[char] = wibox.widget.textbox()
-        letterbox[char]:set_markup("<span color=\"" .. beautiful.fg_normal.."\"" .. ">" .. char.upper(char) .. "</span>")
-        letterbox[char]:set_font("dejavu sans mono 40")
+        letterbox[char]:set_markup(
+          "<span color=\"" .. revelation.fg .. "\"" .. ">" ..
+            char.upper(char) ..
+          "</span>"
+        )
+        letterbox[char]:set_font(revelation.font)
         letterbox[char]:set_align("center")
         hintbox[char]:set_widget(letterbox[char])
     end
