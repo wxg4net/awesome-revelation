@@ -21,6 +21,7 @@ local naughty      = require("naughty")
 local table        = table
 local tostring     = tostring
 local capi         = {
+    awesome        = awesome,
     tag            = tag,
     client         = client,
     keygrabber     = keygrabber,
@@ -28,7 +29,8 @@ local capi         = {
     mouse          = mouse,
     screen         = screen
 }
-local delayed_call = require("gears.timer").delayed_call
+-- the function is still in develop version
+--local delayed_call = require("gears.timer").delayed_call
 
 local clientData = {} -- table that holds the positions and sizes of floating clients
 
@@ -151,7 +153,8 @@ function revelation.expose(args)
 
         awful.tag.viewonly(t[scr], t.screen)
     end
-    delayed_call(function() revelation.expose_callback(t, zt) end)
+    capi.awesome.emit_signal("refresh")
+    revelation.expose_callback(t, zt) 
 end
 
 
