@@ -22,6 +22,7 @@ local table        = table
 local clock        = os.clock
 local tostring     = tostring
 local capi         = {
+    awesome        = awesome,
     tag            = tag,
     client         = client,
     keygrabber     = keygrabber,
@@ -29,14 +30,15 @@ local capi         = {
     mouse          = mouse,
     screen         = screen
 }
+-- the function is still in develop version
+--local delayed_call = require("gears.timer").delayed_call
 
-local revelation ={}
 local clientData = {} -- table that holds the positions and sizes of floating clients
 
-charorder = "jkluiopyhnmfdsatgvcewqzx1234567890"
-hintbox = {} -- Table of letter wiboxes with characters as the keys
+local charorder = "jkluiopyhnmfdsatgvcewqzx1234567890"
+local hintbox = {} -- Table of letter wiboxes with characters as the keys
 
-revelation = {
+local revelation = {
     -- Name of expose tag.
     tag_name = "Revelation",
 
@@ -61,7 +63,10 @@ revelation = {
     },
     tags_status = {},
     is_excluded = false,
-    curr_tag_only = false
+    curr_tag_only = false,
+    font = "monospace 20",
+    fg = beautiful.fg_normal,
+    hintsize = beautiful.xresources.apply_dpi(50)
 }
 
 
@@ -71,15 +76,12 @@ revelation = {
 local function selectfn(restore)
     return function(c)
         restore()
-        -- Pop to client tag
-        awful.tag.viewonly(c:tags()[1], c.screen)
+
         -- Focus and raise
         if c.minimized then
             c.minimized = false
         end
-        capi.client.focus = c
-        awful.screen.focus(c.screen)
-        c:raise()
+        awful.client.jumpto(c)
     end
 end
 
@@ -89,18 +91,18 @@ end
 -- @param t The tag to give matching clients.
 local function match_clients(rule, clients, t, is_excluded)
     local mfc = rule.any and revelation.match.any or revelation.match.exact
-    local mf = is_excluded and function(c,rule) return not mfc(c,rule) end or mfc 
-    local k,v, flt
+    local mf = is_excluded and function(c,_rule) return not mfc(c,_rule) end or mfc
+    local flt
     for _, c in pairs(clients) do
         if mf(c, rule) then
             -- Store geometry before setting their tags
             clientData[c] = {}
-            if awful.client.floating.get(c) then 
+            if awful.client.floating.get(c) then
                 clientData[c]["geometry"] = c:geometry()
-                flt = awful.client.property.get(c, "floating") 
-                if flt ~= nil then 
+                flt = awful.client.property.get(c, "floating")
+                if flt ~= nil then
                     clientData[c]["floating"] = flt
-                    awful.client.property.set(c, "floating", false) 
+                    awful.client.property.set(c, "floating", false)
                 end
 
             end
@@ -108,7 +110,7 @@ local function match_clients(rule, clients, t, is_excluded)
             for k,v in pairs(revelation.property_to_watch) do
                 clientData[c][k] = c[k]
                 c[k] = v
-                
+
             end
             awful.client.toggletag(t, c)
         end
@@ -123,7 +125,7 @@ end
 
 
 function revelation.expose(args)
-    local args = args or {}
+    args = args or {}
     local rule = args.rule or {}
     local is_excluded = args.is_excluded or false
     local curr_tag_only = args.curr_tag_only or false
@@ -136,9 +138,6 @@ function revelation.expose(args)
 
 
     for scr=1,capi.screen.count() do
-
-        all_tags = awful.tag.gettags(scr)
-
         t[scr] = awful.tag.new({revelation.tag_name},
         scr,
         awful.layout.suit.fair)[1]
@@ -147,43 +146,60 @@ function revelation.expose(args)
         awful.layout.suit.fair)[1]
 
 
-        if curr_tag_only then 
+        if curr_tag_only then
             match_clients(rule, awful.client.visible(scr), t[scr], is_excluded)
         else
             match_clients(rule, capi.client.get(scr), t[scr], is_excluded)
         end
 
         awful.tag.viewonly(t[scr], t.screen)
-    end 
+    end
+    capi.awesome.emit_signal("refresh")
+    revelation.expose_callback(t, zt) 
+end
 
 
-
-    -- this timer is used to want the the geometry of clients are recalcuated.
-    -- if timeout = 0.0, it consumes cpu, timeout = 0.001 is good enough.
-    --
-    local block_timer = timer({ timeout = 0.001 })
+    ---- descrepted
+    ---- this timer is used to want the the geometry of clients are recalcuated.
+    ---- if timeout = 0.0, it consumes cpu, timeout = 0.001 is good enough.
+    ----
+    --local block_timer = timer({ timeout = 0.001 })
     
+    --local hintindex = {} -- Table of visible clients with the hint letter as the keys
+    --local clientlist = awful.client.visible()
+
+    --block_timer:connect_signal("timeout", function () 
+        --for i,thisclient in pairs(clientlist) do 
+            ---- Move wiboxes to center of visible windows and populate hintindex
+            --local char = charorder:sub(i,i)
+            --hintindex[char] = thisclient
+            --hintbox[char].visible = true
+            --local geom = thisclient.geometry(thisclient)
+            --hintbox[char].x = geom.x + geom.width/2 - hintsize/2
+            --hintbox[char].y = geom.y + geom.height/2 - hintsize/2
+            --hintbox[char].screen = thisclient.screen
+        --end
+    --end)
+
+    --block_timer:start()
+
+function revelation.expose_callback(t, zt)
     local hintindex = {} -- Table of visible clients with the hint letter as the keys
     local clientlist = awful.client.visible()
-
-    block_timer:connect_signal("timeout", function () 
-        for i,thisclient in pairs(clientlist) do 
-            -- Move wiboxes to center of visible windows and populate hintindex
-            local char = charorder:sub(i,i)
+    for i,thisclient in pairs(clientlist) do
+        -- Move wiboxes to center of visible windows and populate hintindex
+        local char = charorder:sub(i,i)
+        if char and char ~= '' then
             hintindex[char] = thisclient
+            local geom = thisclient:geometry()
             hintbox[char].visible = true
-            local geom = thisclient.geometry(thisclient)
-            hintbox[char].x = geom.x + geom.width/2 - hintsize/2
-            hintbox[char].y = geom.y + geom.height/2 - hintsize/2
+            hintbox[char].x = math.floor(geom.x + geom.width/2 - revelation.hintsize/2)
+            hintbox[char].y = math.floor(geom.y + geom.height/2 - revelation.hintsize/2)
             hintbox[char].screen = thisclient.screen
         end
-    end)
-
-    block_timer:start()
-
+    end
 
     local function restore()
-        local k,v
         for scr=1, capi.screen.count() do
             awful.tag.history.restore(scr)
             t[scr].screen = nil
@@ -199,7 +215,7 @@ function revelation.expose(args)
 
         local clients
         for scr=1, capi.screen.count() do
-            if revelation.curr_tag_only then 
+            if revelation.curr_tag_only then
                 clients = awful.client.visible(scr)
             else
                 clients = capi.client.get(scr)
@@ -207,12 +223,12 @@ function revelation.expose(args)
 
             for _, c in pairs(clients) do
                 if clientData[c] then
-                    for k,v in pairs(clientData[c]) do 
-                        if v ~= nil then 
+                    for k,v in pairs(clientData[c]) do
+                        if v ~= nil then
                             if k== "geometry" then
                                 c:geometry(v)
                             elseif k == "floating" then
-                                awful.client.property.set(c, "floating", v) 
+                                awful.client.property.set(c, "floating", v)
                             else
                                 c[k]=v
                             end
@@ -230,19 +246,19 @@ function revelation.expose(args)
 
     local zoomed = false
     local zoomedClient = nil
-    local keyPressed = false
 
+    local keyPressed = false
     capi.keygrabber.run(function (mod, key, event)
-        local c = nil
-        local keyPressed = false
+        local c
+        keyPressed = false
 
         if event == "release" then return true end
-            
+
         --if awful.util.table.hasitem(mod, "Shift") then
             --debuginfo("dogx")
             --debuginfo(string.lower(key))
         --end
-            
+
         if awful.util.table.hasitem(mod, "Shift") then
             if keyPressed then
                 keyPressed = false
@@ -257,15 +273,15 @@ function revelation.expose(args)
                     awful.tag.history.restore(capi.mouse.screen)
                     awful.client.toggletag(zt[capi.mouse.screen], zoomedClient)
                     zoomedClient = nil
-                    zoomed = false 
+                    zoomed = false
                 end
             end
         end
 
-        if hintindex[key] then 
+        if hintindex[key] then
             --client.focus = hintindex[key]
             --hintindex[key]:raise()
-            
+
 
             selectfn(restore)(hintindex[key])
 
@@ -274,7 +290,7 @@ function revelation.expose(args)
             end
 
             return false
-        end 
+        end
 
         if key == "Escape" then
             for i,j in pairs(hintindex) do
@@ -300,9 +316,9 @@ function revelation.expose(args)
                 hintbox[i].visible = false
             end
             return false
-        elseif mouse.buttons[2] == true and pressedMiddle == false and c ~= nil then 
-            -- is true whenever the button is down. 
-            pressedMiddle = true 
+        elseif mouse.buttons[2] == true and pressedMiddle == false and c ~= nil then
+            -- is true whenever the button is down.
+            pressedMiddle = true
             -- extra variable needed to prevent script from spam-closing windows
             c:kill()
             return true
@@ -318,7 +334,7 @@ function revelation.expose(args)
                 awful.tag.history.restore(capi.mouse.screen)
                 awful.client.toggletag(zt[capi.mouse.screen], zoomedClient)
                 zoomedClient = nil
-                zoomed = false 
+                zoomed = false
             end
         end
 
@@ -333,14 +349,12 @@ end
 -- Create the wiboxes, but don't show them
 --
 function revelation.init(args)
-    hintsize = 60
-    local fontcolor = beautiful.fg_normal
     local letterbox = {}
 
-    local args = args or {}
+    args = args or {}
 
     revelation.tag_name = args.tag_name or revelation.tag_name
-    if args.match then 
+    if args.match then
         revelation.match.exact = args.match.exact or revelation.match.exact
         revelation.match.any = args.match.any or revelation.match.any
     end
@@ -350,11 +364,15 @@ function revelation.init(args)
         local char = charorder:sub(i,i)
         hintbox[char] = wibox({fg=beautiful.fg_normal, bg=beautiful.bg_focus, border_color=beautiful.border_focus, border_width=beautiful.border_width})
         hintbox[char].ontop = true
-        hintbox[char].width = hintsize
-        hintbox[char].height = hintsize
+        hintbox[char].width = revelation.hintsize
+        hintbox[char].height = revelation.hintsize
         letterbox[char] = wibox.widget.textbox()
-        letterbox[char]:set_markup("<span color=\"" .. beautiful.fg_normal.."\"" .. ">" .. char.upper(char) .. "</span>")
-        letterbox[char]:set_font("dejavu sans mono 40")
+        letterbox[char]:set_markup(
+          "<span color=\"" .. revelation.fg .. "\"" .. ">" ..
+            char.upper(char) ..
+          "</span>"
+        )
+        letterbox[char]:set_font(revelation.font)
         letterbox[char]:set_align("center")
         hintbox[char]:set_widget(letterbox[char])
     end
