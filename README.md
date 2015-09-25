@@ -7,9 +7,11 @@ It is modified from the original revelation.lua for incorperating with awesome 3
 It also have some features.  
 
 
-**Master branch is only working with awesome master branch.**
+**Now master branch works for both master and stable awesome WM**
 
-**For current stable version of awesome, 3.5.6, please checkout stable version**
+~~Master branch is only working with awesome master branch.~~
+
+~~For current stable version of awesome, 3.5.6, please checkout stable version~~
 
 ## Changes since 2014-02-19
 ## Changes since 2014-02-19
