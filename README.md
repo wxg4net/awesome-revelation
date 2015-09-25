@@ -5,6 +5,15 @@ Provides Mac OSX like 'Expose' view of all clients.
 This is a fork from [revelation](https://github.com/bioe007/awesome-revelation)
 It is modified from the original revelation.lua for incorperating with awesome 3.5 or later. 
 It also have some features.  
+
+
+**Now master branch works for both master and stable awesome WM**
+
+~~Master branch is only working with awesome master branch.~~
+
+~~For current stable version of awesome, 3.5.6, please checkout stable version~~
+
+## Changes since 2014-02-19
 ## Changes since 2014-02-19
 * Now the revlation is able to handle the special clients(float, fullscreen or maximized etc.)
 * When you select an minimized client, the revelation will un-minimized it and then focuse on it.

@@ -30,8 +30,8 @@ local capi         = {
     mouse          = mouse,
     screen         = screen
 }
--- the function is still in develop version
---local delayed_call = require("gears.timer").delayed_call
+
+local delayed_call = (type(timer) ~= 'table' and  require("gears.timer").delayed_call)
 
 local clientData = {} -- table that holds the positions and sizes of floating clients
 
@@ -66,7 +66,7 @@ local revelation = {
     curr_tag_only = false,
     font = "monospace 20",
     fg = beautiful.fg_normal,
-    hintsize = beautiful.xresources.apply_dpi(50)
+    hintsize = (type(beautiful.xresources) == 'table' and beautiful.xresources.apply_dpi(50) or 60)
 }
 
 
@@ -154,8 +154,14 @@ function revelation.expose(args)
 
         awful.tag.viewonly(t[scr], t.screen)
     end
-    capi.awesome.emit_signal("refresh")
-    revelation.expose_callback(t, zt) 
+
+    if type(delayed_call) == 'function' then
+        delayed_call(function () revelation.expose_callback(t, zt) end )
+    else
+        revelation.expose_callback(t, zt)
+        -- No need for awesome WM 3.5.6
+        --capi.awesome.emit_signal("refresh")
+    end
 end
 
 
