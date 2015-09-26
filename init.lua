@@ -31,6 +31,8 @@ local capi         = {
     screen         = screen
 }
 
+-- disable for now. 
+-- It seems there is not way to pass err handling function into the delayed_call()
 local delayed_call = (type(timer) ~= 'table' and  require("gears.timer").delayed_call)
 
 local clientData = {} -- table that holds the positions and sizes of floating clients
@@ -156,21 +158,25 @@ function revelation.expose(args)
         awful.tag.viewonly(t[scr], t.screen)
     end
 
-    --local pcall=pcall
-    local status
     if type(delayed_call) == 'function' then
-        status = pcall(delayed_call, function () revelation.expose_callback(t, zt) end) 
-        debuginfo(status)
-    else
-        callback = function ()
-                    revelation.expose_callback(t, zt)
-                    end
-        -- No need for awesome WM 3.5.6
-        --capi.awesome.emit_signal("refresh")
+        capi.awesome.emit_signal("refresh")
     end
-    --local status=pcall(callback)
+    -- No need for awesome WM 3.5.6
+    --capi.awesome.emit_signal("refresh")
+    local status, err=pcall(revelation.expose_callback, t, zt) 
+    if not status then
+        debuginfo('Oops!, something is wrong in revelation.expose_callback!')
 
-    if not status then revelation.restore(t, zt) end
+        if err.msg then 
+            debuginfo(err.msg) 
+        end
+        if err.code then 
+            debuginfo('error code is '.. tostring(err.code)) 
+        end
+
+        revelation.restore(t, zt)
+
+    end
 end
 
 
@@ -262,64 +268,11 @@ function revelation.expose_callback(t, zt)
     local zoomedClient = nil
 
     local keyPressed = false
-    local keygrabber_ok = false
-    keygrabber_ok = pcall(capi.keygrabber.run, function (mod, key, event)
-        local c
-        keyPressed = false
-
-        if event == "release" then return true end
-
-        --if awful.util.table.hasitem(mod, "Shift") then
-            --debuginfo("dogx")
-            --debuginfo(string.lower(key))
-        --end
-
-        if awful.util.tabe.hasitem(mod, "Shift") then
-            if keyPressed then
-                keyPressed = false
-            else
-                c = hintindex[string.lower(key)]
-                if not zoomed and c ~= nil then
-                    awful.tag.viewonly(zt[capi.mouse.screen], capi.mouse.screen)
-                    awful.client.toggletag(zt[capi.mouse.screen], c)
-                    zoomedClient = c
-                    zoomed = true
-                elseif zoomedClient ~= nil then
-                    awful.tag.history.restore(capi.mouse.screen)
-                    awful.client.toggletag(zt[capi.mouse.screen], zoomedClient)
-                    zoomedClient = nil
-                    zoomed = false
-                end
-            end
-        end
-
-        if hintindex[key] then
-            --client.focus = hintindex[key]
-            --hintindex[key]:raise()
-
-
-            selectfn(restore,t, zt)(hintindex[key])
-
-            for i,j in pairs(hintindex) do
-                hintbox[i].visible = false
-            end
-
-            return false
-        end
-
-        if key == "Escape" then
-            for i,j in pairs(hintindex) do
-                hintbox[i].visible = false
-            end
-            revelation.restore(t, zt)
-            return false
-        end
-
-        return true
-    end)
-
-    debuginfo(keygrabber_ok)
-    if not keygrabber_ok then revelation.restore(t, zt) end
+    if not capi.keygrabber.run(function (mod, key, event) 
+            revelation.keyboard_run(mod, key, event, t, zt)
+        end) then
+        error({msg="something is wrong in revelation.keyboard_run()", code=511})
+    end
 
 
     local pressedMiddle = false
@@ -395,6 +348,58 @@ function revelation.init(args)
         hintbox[char]:set_widget(letterbox[char])
     end
 end
+
+
+function revelation.keyboard_run(mod, key,event, t, zt)
+        local c
+        keyPressed = false
+
+        if event == "release" then return true end
+
+        if awful.util.table.hasite(mod, "Shift") then
+            if keyPressed then
+                keyPressed = false
+            else
+                c = hintindex[string.lower(key)]
+                if not zoomed and c ~= nil then
+                    awful.tag.viewonly(zt[capi.mouse.screen], capi.mouse.screen)
+                    awful.client.toggletag(zt[capi.mouse.screen], c)
+                    zoomedClient = c
+                    zoomed = true
+                elseif zoomedClient ~= nil then
+                    awful.tag.history.restore(capi.mouse.screen)
+                    awful.client.toggletag(zt[capi.mouse.screen], zoomedClient)
+                    zoomedClient = nil
+                    zoomed = false
+                end
+            end
+        end
+
+        if hintindex[key] then
+            --client.focus = hintindex[key]
+            --hintindex[key]:raise()
+
+
+            selectfn(restore,t, zt)(hintindex[key])
+
+            for i,j in pairs(hintindex) do
+                hintbox[i].visible = false
+            end
+
+            return false
+        end
+
+        if key == "Escape" then
+            for i,j in pairs(hintindex) do
+                hintbox[i].visible = false
+            end
+            revelation.restore(t, zt)
+            return false
+        end
+
+        return true
+    end
+
 
 local function debuginfo( message )
 
