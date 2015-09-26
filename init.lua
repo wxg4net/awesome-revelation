@@ -161,9 +161,11 @@ function revelation.expose(args)
     if type(delayed_call) == 'function' then
         capi.awesome.emit_signal("refresh")
     end
-    -- No need for awesome WM 3.5.6
-    --capi.awesome.emit_signal("refresh")
+    -- No need for awesome WM 3.5.6: capi.awesome.emit_signal("refresh")
+    --
     local status, err=pcall(revelation.expose_callback, t, zt) 
+
+    --revelation.expose_callback(t, zt)
     if not status then
         debuginfo('Oops!, something is wrong in revelation.expose_callback!')
 
@@ -248,6 +250,27 @@ function revelation.restore(t, zt)
     end
 end
 
+local function hintbox_display_toggle(c, show)
+    for char, thisclient in pairs(hintindex) do
+        if char and char ~= c then
+            hintindex[char] = thisclient
+            if show then
+                hintbox[char].visible = true
+            else
+                hintbox[char].visible = false
+            end
+
+        end
+    end
+end
+
+local function hintbox_pos(char)
+    local client = hintindex[char]
+    local geom = client:geometry()
+    hintbox[char].x = math.floor(geom.x + geom.width/2 - revelation.hintsize/2)
+    hintbox[char].y = math.floor(geom.y + geom.height/2 - revelation.hintsize/2)
+end
+
 
 function revelation.expose_callback(t, zt)
     local clientlist = awful.client.visible()
@@ -256,30 +279,94 @@ function revelation.expose_callback(t, zt)
         local char = charorder:sub(i,i)
         if char and char ~= '' then
             hintindex[char] = thisclient
-            local geom = thisclient:geometry()
+            hintbox_pos(char)
             hintbox[char].visible = true
-            hintbox[char].x = math.floor(geom.x + geom.width/2 - revelation.hintsize/2)
-            hintbox[char].y = math.floor(geom.y + geom.height/2 - revelation.hintsize/2)
             hintbox[char].screen = thisclient.screen
         end
     end
 
     local zoomed = false
     local zoomedClient = nil
+    local key_char_zoomed = nil
 
-    local keyPressed = false
-    if not capi.keygrabber.run(function (mod, key, event) 
-            revelation.keyboard_run(mod, key, event, t, zt)
-        end) then
-        error({msg="something is wrong in revelation.keyboard_run()", code=511})
-    end
+    capi.keygrabber.run(function (mod, key, event) 
+        local c
+        if event == "release" then return true end
 
+        if awful.util.table.hasitem(mod, "Shift") then
+            key_char = string.lower(key)
+            c = hintindex[key_char]
+            if not zoomed and c ~= nil then
+                awful.tag.viewonly(zt[capi.mouse.screen], capi.mouse.screen)
+                awful.client.toggletag(zt[capi.mouse.screen], c)
+                zoomedClient = c
+                key_char_zoomed = key_char
+                zoomed = true
+                -- update the position of this hintbox, since it is zoomed
+                if type(delayed_call) == 'function' then 
+                    capi.awesome.emit_signal("refresh")
+                end
+                hintbox_pos(key_char)
+                hintbox_display_toggle(key_char, false)
+
+
+            elseif zoomedClient ~= nil then
+                awful.tag.history.restore(capi.mouse.screen)
+                awful.client.toggletag(zt[capi.mouse.screen], zoomedClient)
+                hintbox_display_toggle(key_char,  true)
+                if type(delayed_call) == 'function' then 
+                    capi.awesome.emit_signal("refresh")
+                end
+                hintbox_pos(key_char_zoomed) 
+
+                zoomedClient = nil
+                zoomed = false
+            end
+        end
+
+        if hintindex[key] then
+            --client.focus = hintindex[key]
+            --hintindex[key]:raise()
+
+
+            selectfn(restore,t, zt)(hintindex[key])
+
+            for i,j in pairs(hintindex) do
+                hintbox[i].visible = false
+            end
+
+            return false
+        end
+
+        if key == "Escape" then
+            if zoomedClient ~= nil then 
+                awful.tag.history.restore(capi.mouse.screen)
+                awful.client.toggletag(zt[capi.mouse.screen], zoomedClient)
+                hintbox_display_toggle(string.lower(key),  true)
+                if type(delayed_call) == 'function' then 
+                    capi.awesome.emit_signal("refresh")
+                end
+                hintbox_pos(key_char_zoomed) 
+
+                zoomedClient = nil
+                zoomed = false
+            else
+                for i,j in pairs(hintindex) do
+                    hintbox[i].visible = false
+                end
+                revelation.restore(t, zt)
+                return false
+            end
+        end
+
+        return true
+    end) 
 
     local pressedMiddle = false
-    local pressedRight = false
 
     capi.mousegrabber.run(function(mouse)
         local c = awful.mouse.client_under_pointer()
+        local key_char = awful.util.table.hasitem(hintindex, c) 
         if mouse.buttons[1] == true then
             selectfn(restore, t, zt)(c)
 
@@ -291,19 +378,53 @@ function revelation.expose_callback(t, zt)
             -- is true whenever the button is down.
             pressedMiddle = true
             -- extra variable needed to prevent script from spam-closing windows
+            --
+            if zoomed == true and zoomedClient ~=nil then 
+                awful.tag.history.restore(capi.mouse.screen)
+                awful.client.toggletag(zt[capi.mouse.screen], zoomedClient)
+            end
             c:kill()
+            hintbox[key_char].visible = false
+            hintindex[key_char] = nil
+
+
+            if zoomed == true and zoomedClient ~=nil then 
+                hintbox_display_toggle(key_char_zoomed, true)
+                zoomedClient = nil
+                zoomed = false
+                key_char_zoomed = nil
+            end
+            
             return true
+
         elseif mouse.buttons[2] == false and pressedMiddle == true then
             pressedMiddle = false
-        elseif mouse.buttons[3] == true and pressedRight == false then
+            for key, _ in pairs(hintindex) do
+                hintbox_pos(key) 
+            end
+        elseif mouse.buttons[3] == true then
             if not zoomed and c ~= nil then
                 awful.tag.viewonly(zt[capi.mouse.screen], capi.mouse.screen)
                 awful.client.toggletag(zt[capi.mouse.screen], c)
+                if key_char ~= nil then 
+                    hintbox_display_toggle(key_char, false)
+                    if type(delayed_call) == 'function' then 
+                        capi.awesome.emit_signal("refresh")
+                    end
+                    hintbox_pos(key_char) 
+                end
                 zoomedClient = c
                 zoomed = true
+                key_char_zoomed = key_char
             elseif zoomedClient ~= nil then
                 awful.tag.history.restore(capi.mouse.screen)
                 awful.client.toggletag(zt[capi.mouse.screen], zoomedClient)
+                hintbox_display_toggle(key_char_zoomed, true)
+                if type(delayed_call) == 'function' then 
+                    capi.awesome.emit_signal("refresh")
+                end
+                hintbox_pos(key_char_zoomed) 
+
                 zoomedClient = nil
                 zoomed = false
             end
@@ -350,55 +471,7 @@ function revelation.init(args)
 end
 
 
-function revelation.keyboard_run(mod, key,event, t, zt)
-        local c
-        keyPressed = false
 
-        if event == "release" then return true end
-
-        if awful.util.table.hasite(mod, "Shift") then
-            if keyPressed then
-                keyPressed = false
-            else
-                c = hintindex[string.lower(key)]
-                if not zoomed and c ~= nil then
-                    awful.tag.viewonly(zt[capi.mouse.screen], capi.mouse.screen)
-                    awful.client.toggletag(zt[capi.mouse.screen], c)
-                    zoomedClient = c
-                    zoomed = true
-                elseif zoomedClient ~= nil then
-                    awful.tag.history.restore(capi.mouse.screen)
-                    awful.client.toggletag(zt[capi.mouse.screen], zoomedClient)
-                    zoomedClient = nil
-                    zoomed = false
-                end
-            end
-        end
-
-        if hintindex[key] then
-            --client.focus = hintindex[key]
-            --hintindex[key]:raise()
-
-
-            selectfn(restore,t, zt)(hintindex[key])
-
-            for i,j in pairs(hintindex) do
-                hintbox[i].visible = false
-            end
-
-            return false
-        end
-
-        if key == "Escape" then
-            for i,j in pairs(hintindex) do
-                hintbox[i].visible = false
-            end
-            revelation.restore(t, zt)
-            return false
-        end
-
-        return true
-    end
 
 
 local function debuginfo( message )
