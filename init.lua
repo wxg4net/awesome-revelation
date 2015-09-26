@@ -37,6 +37,7 @@ local clientData = {} -- table that holds the positions and sizes of floating cl
 
 local charorder = "jkluiopyhnmfdsatgvcewqzx1234567890"
 local hintbox = {} -- Table of letter wiboxes with characters as the keys
+local hintindex = {} -- Table of visible clients with the hint letter as the keys
 
 local revelation = {
     -- Name of expose tag.
@@ -73,9 +74,9 @@ local revelation = {
 -- Executed when user selects a client from expose view.
 --
 -- @param restore Function to reset the current tags view.
-local function selectfn(restore)
+local function selectfn(restore, t, zt)
     return function(c)
-        restore()
+        revelation.restore(t, zt)
 
         -- Focus and raise
         if c.minimized then
@@ -155,13 +156,21 @@ function revelation.expose(args)
         awful.tag.viewonly(t[scr], t.screen)
     end
 
+    --local pcall=pcall
+    local status
     if type(delayed_call) == 'function' then
-        delayed_call(function () revelation.expose_callback(t, zt) end )
+        status = pcall(delayed_call, function () revelation.expose_callback(t, zt) end) 
+        debuginfo(status)
     else
-        revelation.expose_callback(t, zt)
+        callback = function ()
+                    revelation.expose_callback(t, zt)
+                    end
         -- No need for awesome WM 3.5.6
         --capi.awesome.emit_signal("refresh")
     end
+    --local status=pcall(callback)
+
+    if not status then revelation.restore(t, zt) end
 end
 
 
@@ -189,8 +198,52 @@ end
 
     --block_timer:start()
 
+function revelation.restore(t, zt)
+    for scr=1, capi.screen.count() do
+        awful.tag.history.restore(scr)
+        t[scr].screen = nil
+    end
+
+    capi.keygrabber.stop()
+    capi.mousegrabber.stop()
+    
+    for scr=1, capi.screen.count() do
+        t[scr].activated = false
+        zt[scr].activated = false
+    end
+
+    local clients
+    for scr=1, capi.screen.count() do
+        if revelation.curr_tag_only then
+            clients = awful.client.visible(scr)
+        else
+            clients = capi.client.get(scr)
+        end
+
+        for _, c in pairs(clients) do
+            if clientData[c] then
+                for k,v in pairs(clientData[c]) do
+                    if v ~= nil then
+                        if k== "geometry" then
+                            c:geometry(v)
+                        elseif k == "floating" then
+                            awful.client.property.set(c, "floating", v)
+                        else
+                            c[k]=v
+                        end
+                    end
+                end
+            end
+        end
+    end
+
+    for i,j in pairs(hintindex) do
+        hintbox[i].visible = false
+    end
+end
+
+
 function revelation.expose_callback(t, zt)
-    local hintindex = {} -- Table of visible clients with the hint letter as the keys
     local clientlist = awful.client.visible()
     for i,thisclient in pairs(clientlist) do
         -- Move wiboxes to center of visible windows and populate hintindex
@@ -205,56 +258,12 @@ function revelation.expose_callback(t, zt)
         end
     end
 
-    local function restore()
-        for scr=1, capi.screen.count() do
-            awful.tag.history.restore(scr)
-            t[scr].screen = nil
-        end
-        block_timer:stop()
-        capi.keygrabber.stop()
-        capi.mousegrabber.stop()
-        
-        for scr=1, capi.screen.count() do
-            t[scr].activated = false
-            zt[scr].activated = false
-        end
-
-        local clients
-        for scr=1, capi.screen.count() do
-            if revelation.curr_tag_only then
-                clients = awful.client.visible(scr)
-            else
-                clients = capi.client.get(scr)
-            end
-
-            for _, c in pairs(clients) do
-                if clientData[c] then
-                    for k,v in pairs(clientData[c]) do
-                        if v ~= nil then
-                            if k== "geometry" then
-                                c:geometry(v)
-                            elseif k == "floating" then
-                                awful.client.property.set(c, "floating", v)
-                            else
-                                c[k]=v
-                            end
-                        end
-                    end
-                end
-            end
-        end
-
-        for i,j in pairs(hintindex) do
-            hintbox[i].visible = false
-        end
-
-    end
-
     local zoomed = false
     local zoomedClient = nil
 
     local keyPressed = false
-    capi.keygrabber.run(function (mod, key, event)
+    local keygrabber_ok = false
+    keygrabber_ok = pcall(capi.keygrabber.run, function (mod, key, event)
         local c
         keyPressed = false
 
@@ -265,7 +274,7 @@ function revelation.expose_callback(t, zt)
             --debuginfo(string.lower(key))
         --end
 
-        if awful.util.table.hasitem(mod, "Shift") then
+        if awful.util.tabe.hasitem(mod, "Shift") then
             if keyPressed then
                 keyPressed = false
             else
@@ -289,7 +298,7 @@ function revelation.expose_callback(t, zt)
             --hintindex[key]:raise()
 
 
-            selectfn(restore)(hintindex[key])
+            selectfn(restore,t, zt)(hintindex[key])
 
             for i,j in pairs(hintindex) do
                 hintbox[i].visible = false
@@ -302,12 +311,15 @@ function revelation.expose_callback(t, zt)
             for i,j in pairs(hintindex) do
                 hintbox[i].visible = false
             end
-            restore()
+            revelation.restore(t, zt)
             return false
         end
 
         return true
     end)
+
+    debuginfo(keygrabber_ok)
+    if not keygrabber_ok then revelation.restore(t, zt) end
 
 
     local pressedMiddle = false
@@ -316,7 +328,7 @@ function revelation.expose_callback(t, zt)
     capi.mousegrabber.run(function(mouse)
         local c = awful.mouse.client_under_pointer()
         if mouse.buttons[1] == true then
-            selectfn(restore)(c)
+            selectfn(restore, t, zt)(c)
 
             for i,j in pairs(hintindex) do
                 hintbox[i].visible = false
