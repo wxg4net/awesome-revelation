@@ -68,7 +68,7 @@ local revelation = {
     is_excluded = false,
     curr_tag_only = false,
     font = "monospace 20",
-    fg = beautiful.fg_normal,
+    fg = beautiful.fg_normal or "#DCDCCC"
     hintsize = (type(beautiful.xresources) == 'table' and beautiful.xresources.apply_dpi(50) or 60)
 }
 
