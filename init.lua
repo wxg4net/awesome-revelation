@@ -1,4 +1,4 @@
--- revelation .lua
+-- revelation.lua
 --
 -- Library that implements Expose like behavior.
 --
@@ -8,6 +8,7 @@
 -- @auther Quan Guo guotsuan@gmail.com
 --
 -- @copyright 2008 Espen Wiborg, Julien Danjou
+-- @copyright 2015 Quan Guo
 --
 
 
@@ -35,11 +36,13 @@ local capi         = {
 -- It seems there is not way to pass err handling function into the delayed_call()
 local delayed_call = (type(timer) ~= 'table' and  require("gears.timer").delayed_call)
 
-local clientData = {} -- table that holds the positions and sizes of floating clients
 
 local charorder = "jkluiopyhnmfdsatgvcewqzx1234567890"
 local hintbox = {} -- Table of letter wiboxes with characters as the keys
 local hintindex = {} -- Table of visible clients with the hint letter as the keys
+
+local clients = {} --Table of clients to be exposed after fitlering
+local clientData = {} -- table that holds the positions and sizes of floating clients
 
 local revelation = {
     -- Name of expose tag.
@@ -94,11 +97,13 @@ end
 -- @param rule The rule. Conforms to awful.rules syntax.
 -- @param clients A table of clients to check.
 -- @param t The tag to give matching clients.
-local function match_clients(rule, clients, t, is_excluded)
+local function match_clients(rule, _clients, t, is_excluded)
+
     local mfc = rule.any and revelation.match.any or revelation.match.exact
     local mf = is_excluded and function(c,_rule) return not mfc(c,_rule) end or mfc
     local flt
-    for _, c in pairs(clients) do
+
+    for _, c in pairs(_clients) do
         if mf(c, rule) then
             -- Store geometry before setting their tags
             clientData[c] = {}
@@ -118,9 +123,10 @@ local function match_clients(rule, clients, t, is_excluded)
 
             end
             awful.client.toggletag(t, c)
+            table.insert(clients, c)
         end
     end
-    return clients
+
 end
 
 
@@ -141,6 +147,8 @@ function revelation.expose(args)
     local t={}
     local zt={}
 
+    clients = {}
+    clientData = {}
 
     for scr=1,capi.screen.count() do
         t[scr] = awful.tag.new({revelation.tag_name},
@@ -152,7 +160,7 @@ function revelation.expose(args)
 
 
         if curr_tag_only then
-            match_clients(rule, awful.client.visible(scr), t[scr], is_excluded)
+             match_clients(rule, awful.client.visible(scr), t[scr], is_excluded)
         else
             match_clients(rule, capi.client.get(scr), t[scr], is_excluded)
         end
@@ -165,7 +173,7 @@ function revelation.expose(args)
     end
     -- No need for awesome WM 3.5.6: capi.awesome.emit_signal("refresh")
     --
-    local status, err=pcall(revelation.expose_callback, t, zt) 
+    local status, err=pcall(revelation.expose_callback, t, zt, clients) 
 
     --revelation.expose_callback(t, zt)
     if not status then
@@ -274,8 +282,9 @@ local function hintbox_pos(char)
 end
 
 
-function revelation.expose_callback(t, zt)
-    local clientlist = awful.client.visible()
+function revelation.expose_callback(t, zt, clientlist)
+
+    hintindex = {}
     for i,thisclient in pairs(clientlist) do
         -- Move wiboxes to center of visible windows and populate hintindex
         local char = charorder:sub(i,i)
