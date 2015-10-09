@@ -231,6 +231,22 @@ function revelation.restore(t, zt)
     capi.keygrabber.stop()
     capi.mousegrabber.stop()
     
+     for _, c in pairs(clients) do
+            if clientData[c] then
+                for k,v in pairs(clientData[c]) do
+                    if v ~= nil then
+                        if k== "geometry" then
+                            c:geometry(v)
+                        elseif k == "floating" then
+                            awful.client.property.set(c, "floating", v)
+                        else
+                            c[k]=v
+                        end
+                    end
+                end
+            end
+      end
+    
     for scr=1, capi.screen.count() do
         t[scr].activated = false
         zt[scr].activated = false
