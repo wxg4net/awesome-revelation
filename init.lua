@@ -83,6 +83,11 @@ local function selectfn(restore, t, zt)
     return function(c)
         revelation.restore(t, zt)
         -- Focus and raise
+        --
+        if type(delayed_call) == 'function' then
+            capi.awesome.emit_signal("refresh")
+        end
+
         if awful.util.table.hasitem(hintindex, c) then
             if c.minimized then
                 c.minimized = false
@@ -222,37 +227,13 @@ function revelation.restore(t, zt)
         t[scr].screen = nil
     end
 
+
     capi.keygrabber.stop()
     capi.mousegrabber.stop()
     
     for scr=1, capi.screen.count() do
         t[scr].activated = false
         zt[scr].activated = false
-    end
-
-    local clients
-    for scr=1, capi.screen.count() do
-        if revelation.curr_tag_only then
-            clients = awful.client.visible(scr)
-        else
-            clients = capi.client.get(scr)
-        end
-
-        for _, c in pairs(clients) do
-            if clientData[c] then
-                for k,v in pairs(clientData[c]) do
-                    if v ~= nil then
-                        if k== "geometry" then
-                            c:geometry(v)
-                        elseif k == "floating" then
-                            awful.client.property.set(c, "floating", v)
-                        else
-                            c[k]=v
-                        end
-                    end
-                end
-            end
-        end
     end
 
     for i,j in pairs(hintindex) do
