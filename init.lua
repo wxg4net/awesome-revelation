@@ -128,7 +128,9 @@ local function match_clients(rule, _clients, t, is_excluded)
 
             end
             awful.client.toggletag(t, c)
-            table.insert(clients, c)
+            if c:isvisible() then 
+                table.insert(clients, c)
+            end
         end
     end
 
@@ -396,6 +398,8 @@ function revelation.expose_callback(t, zt, clientlist)
             c:kill()
             hintbox[key_char].visible = false
             hintindex[key_char] = nil
+            pos = awful.util.table.hasitem(clients, c)
+            table.remove(clients, pos)
 
 
             if zoomed == true and zoomedClient ~=nil then 
