@@ -14,9 +14,9 @@ It also have some features.
 ~~For current stable version of awesome, 3.5.6, please checkout stable version~~
 
 ## Changes since 2014-02-19
-## Changes since 2014-02-19
 * Now the revlation is able to handle the special clients(float, fullscreen or maximized etc.)
 * When you select an minimized client, the revelation will un-minimized it and then focuse on it.
+* Added an option to change character ordering
 
 ## Changes after 2013-12-30
 * Now it is possible, in revelation.init({...}), to change the default settings of 
@@ -95,7 +95,7 @@ is_excluded=true})`.
 ### Configuration
  Revelation's configuration is done through the init() function
  
- There are two basic settings, shown with default values:
+ There are three basic settings, shown with default values:
 
     -- The name of the tag created for the 'exposed' view
     revelation.tag_name = 'Revelation'
@@ -104,6 +104,9 @@ is_excluded=true})`.
     revelation.exact = awful.rules.match
     revelation.any   = awful.rules.match_any
 
+    -- Character order for selecting clients
+    revelation.charorder = "jkluiopyhnmfdsatgvcewqzx1234567890",
+
  The rule matching functions must conform to `awful.rules.match` prototypes.
 
  For client matching rules, we follow the same syntax as awful.rules expects.
@@ -111,7 +114,7 @@ is_excluded=true})`.
 
 to change the settings, use:
 
-     revelation.init({tag_name = ..., match={...})
+     revelation.init({tag_name = ..., match = {...}, charorder = ...)
 
 
 ### Examples
