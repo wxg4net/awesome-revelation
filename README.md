@@ -18,14 +18,9 @@ When all clients are exposing, you can zoom (__Modkey + Shift + hintbox charater
 or kill a client (__middle button__ of the mouse) and the position of hintboxes will be updated accordingly.
 
 ## Changes since 2014-02-19
-<<<<<<< HEAD
 * Now the revlation is able to handle the special clients(float, fullscreen or maximized etc.)
 * When you select an minimized client, the revelation will un-minimized it and then focuse on it.
 * Added an option to change character ordering
-=======
-* Now the revelation is able to handle the special clients(float, fullscreen or maximized etc.)
-* When you select an minimized client, the revelation will un-minimized it and then focus on it.
->>>>>>> develop
 
 ## Changes after 2013-12-30
 * Now it is possible, in revelation.init({...}), to change the default settings of 
