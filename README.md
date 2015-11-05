@@ -3,7 +3,7 @@
 Provides Mac OSX like 'Expose' view of all clients. 
 
 This is a fork from [revelation](https://github.com/bioe007/awesome-revelation)
-It is modified from the original revelation.lua for incorperating with awesome 3.5 or later. 
+It is modified from the original revelation.lua for incorporating with awesome 3.5 or later. 
 It also have some features.  
 
 
@@ -13,10 +13,19 @@ It also have some features.
 
 ~~For current stable version of awesome, 3.5.6, please checkout stable version~~
 
+## Changes since 2015-09-26
+When all clients are exposing, you can zoom (__Modkey + Shift + hintbox charater__ or __right button__ of the mouse)
+or kill a client (__middle button__ of the mouse) and the position of hintboxes will be updated accordingly.
+
 ## Changes since 2014-02-19
+<<<<<<< HEAD
 * Now the revlation is able to handle the special clients(float, fullscreen or maximized etc.)
 * When you select an minimized client, the revelation will un-minimized it and then focuse on it.
 * Added an option to change character ordering
+=======
+* Now the revelation is able to handle the special clients(float, fullscreen or maximized etc.)
+* When you select an minimized client, the revelation will un-minimized it and then focus on it.
+>>>>>>> develop
 
 ## Changes after 2013-12-30
 * Now it is possible, in revelation.init({...}), to change the default settings of 
@@ -28,8 +37,9 @@ curr_tag_only=...}`.
 1. To add specify rules `revelation({rule={...},...})`.
 2. To exclude the clients matched by the rules instead of including `revelation({rule={...}, 
 is_excluded=true})`.
-3. `{...,curr_tag_only=true}` make the revelation only collect the cliens from current
+3. `{...,curr_tag_only=true}` make the revelation only collect the client from current
   tags.
+
 
 ## Changes from the original revelation
 * Support awesome 3.5 or later 
@@ -41,7 +51,7 @@ is_excluded=true})`.
   navigating clients by pressing the keys "j, h, k, l"  and then selecting the
   client by pressing key "Enter" was deprecated. Now each client in the 'Expose'
   views come with a letter surrounding by a hint box, you can select the client
-  by pressing the corresponding letter in the hint box.  The iead and codes of this method
+  by pressing the corresponding letter in the hint box.  The idea and codes of this method
   was copied from the module [hint](https://github.com/zackpete/hints). 
   
 * Add zoom mode. Add the function of zooming the client by pressing the right
@@ -156,6 +166,8 @@ to change the settings, use:
     * Perry Hargrave <resixian@gmail.com>
 
 ### Contributions, many thanks!
+    * Daniel Hahler <github@thequod.de>
+    * Yauhen Kirylau
     * Nikola Petrov <nikolavp@gmail.com>
 
 ### Original authors
