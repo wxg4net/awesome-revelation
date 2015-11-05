@@ -34,12 +34,13 @@ local delayed_call = (type(timer) ~= 'table' and  require("gears.timer").delayed
 
 local clientData = {} -- table that holds the positions and sizes of floating clients
 
-local charorder = "jkluiopyhnmfdsatgvcewqzx1234567890"
 local hintbox = {} -- Table of letter wiboxes with characters as the keys
 
 local revelation = {
     -- Name of expose tag.
     tag_name = "Revelation",
+
+    charorder = "jkluiopyhnmfdsatgvcewqzx1234567890",
 
     -- Match function can be defined by user.
     -- Must accept a `rule` and `client` and return `boolean`.
@@ -169,7 +170,7 @@ function revelation.expose_callback(t, zt)
     local clientlist = awful.client.visible()
     for i,thisclient in pairs(clientlist) do
         -- Move wiboxes to center of visible windows and populate hintindex
-        local char = charorder:sub(i,i)
+        local char = revelation.charorder:sub(i,i)
         if char and char ~= '' then
             hintindex[char] = thisclient
             local geom = thisclient:geometry()
@@ -337,9 +338,10 @@ function revelation.init(args)
         revelation.match.any = args.match.any or revelation.match.any
     end
 
+    revelation.charorder = args.charorder or revelation.charorder
 
-    for i = 1, #charorder do
-        local char = charorder:sub(i,i)
+    for i = 1, #revelation.charorder do
+        local char = revelation.charorder:sub(i,i)
         hintbox[char] = wibox({fg=beautiful.fg_normal, bg=beautiful.bg_focus, border_color=beautiful.border_focus, border_width=beautiful.border_width})
         hintbox[char].ontop = true
         hintbox[char].width = revelation.hintsize
