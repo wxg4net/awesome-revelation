@@ -114,7 +114,7 @@ is_excluded=true})`.
 
 to change the settings, use:
 
-     revelation.init({tag_name = ..., match = {...}, charorder = ...)
+     revelation.init({tag_name = ..., match = {...}, charorder = ...})
 
 
 ### Examples
