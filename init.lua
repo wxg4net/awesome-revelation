@@ -321,7 +321,7 @@ function revelation.expose_callback(t, zt, clientlist)
             key_char = string.lower(key)
             c = hintindex[key_char]
             if not zoomed and c ~= nil then
-                debuginfo(c.screen)
+                --debuginfo(c.screen)
                 awful.tag.viewonly(zt[c.screen])
                 awful.client.toggletag(zt[c.screen], c)
                 zoomedClient = c
