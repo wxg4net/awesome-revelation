@@ -77,6 +77,17 @@ local revelation = {
 }
 
 
+local function debuginfo(message)
+
+    mm = message
+
+    if not message then
+        mm = "No information avaiable"
+    end
+
+    nid = naughty.notify({ text = tostring(mm), timeout = 10 })
+end
+
 -- Executed when user selects a client from expose view.
 --
 -- @param restore Function to reset the current tags view.
@@ -493,16 +504,6 @@ end
 
 
 
-local function debuginfo( message )
-
-    mm = message
-
-    if not message then
-        mm = "false"
-    end
-
-    nid = naughty.notify({ text = tostring(mm), timeout = 10 })
-end
 setmetatable(revelation, { __call = function(_, ...) return revelation.expose(...) end })
 
 return revelation
