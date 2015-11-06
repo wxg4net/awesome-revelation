@@ -300,7 +300,7 @@ function revelation.expose_callback(t, zt, clientlist)
     hintindex = {}
     for i,thisclient in pairs(clientlist) do
         -- Move wiboxes to center of visible windows and populate hintindex
-        local char = charorder:sub(i,i)
+        local char = revelation.charorder:sub(i,i)
         if char and char ~= '' then
             hintindex[char] = thisclient
             hintbox_pos(char)
