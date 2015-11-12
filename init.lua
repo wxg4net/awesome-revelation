@@ -157,11 +157,8 @@ end
 function revelation.expose(args)
     args = args or {}
     local rule = args.rule or {}
-    local is_excluded = args.is_excluded or false
-    local curr_tag_only = args.curr_tag_only or false
-
-    revelation.is_excluded = is_excluded
-    revelation.curr_tag_only = curr_tag_only
+    local is_excluded = args.is_excluded or revelation.is_excluded
+    local curr_tag_only = args.curr_tag_only or revelation.curr_tag_only
 
     local t={}
     local zt={}
