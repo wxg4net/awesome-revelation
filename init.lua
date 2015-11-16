@@ -78,14 +78,8 @@ local revelation = {
 
 
 local function debuginfo(message)
-
-    mm = message
-
-    if not message then
-        mm = "No information avaiable"
-    end
-
-    nid = naughty.notify({ text = tostring(mm), timeout = 10 })
+    message = message or "No information available"
+    nid = naughty.notify({ text = tostring(message), timeout = 10 })
 end
 
 -- Executed when user selects a client from expose view.
@@ -152,8 +146,6 @@ end
 -- Implement Exposé (ala Mac OS X).
 --
 -- @param rule A table with key and value to match. [{class=""}]
-
-
 function revelation.expose(args)
     args = args or {}
     local rule = args.rule or {}
@@ -168,15 +160,12 @@ function revelation.expose(args)
 
     for scr=1,capi.screen.count() do
         t[scr] = awful.tag.new({revelation.tag_name},
-        scr,
-        awful.layout.suit.fair)[1]
+            scr, awful.layout.suit.fair)[1]
         zt[scr] = awful.tag.new({revelation.tag_name.."_zoom"},
-        scr,
-        awful.layout.suit.fair)[1]
-
+            scr, awful.layout.suit.fair)[1]
 
         if curr_tag_only then
-             match_clients(rule, awful.client.visible(scr), t[scr], is_excluded)
+            match_clients(rule, awful.client.visible(scr), t[scr], is_excluded)
         else
             match_clients(rule, capi.client.get(scr), t[scr], is_excluded)
         end
@@ -194,7 +183,6 @@ function revelation.expose(args)
     --revelation.expose_callback(t, zt)
     if not status then
         debuginfo('Oops!, something is wrong in revelation.expose_callback!')
-
 
         if err.msg then 
             debuginfo(err.msg) 
@@ -239,7 +227,6 @@ function revelation.restore(t, zt)
         awful.tag.history.restore(scr)
         t[scr].screen = nil
     end
-
 
     capi.keygrabber.stop()
     capi.mousegrabber.stop()
@@ -350,7 +337,6 @@ function revelation.expose_callback(t, zt, clientlist)
         if hintindex[key] then
             --client.focus = hintindex[key]
             --hintindex[key]:raise()
-
 
             selectfn(restore,t, zt)(hintindex[key])
 
@@ -496,10 +482,6 @@ function revelation.init(args)
         hintbox[char]:set_widget(letterbox[char])
     end
 end
-
-
-
-
 
 setmetatable(revelation, { __call = function(_, ...) return revelation.expose(...) end })
 
