@@ -198,30 +198,6 @@ function revelation.expose(args)
 end
 
 
-    ---- descrepted
-    ---- this timer is used to want the the geometry of clients are recalcuated.
-    ---- if timeout = 0.0, it consumes cpu, timeout = 0.001 is good enough.
-    ----
-    --local block_timer = timer({ timeout = 0.001 })
-    
-    --local hintindex = {} -- Table of visible clients with the hint letter as the keys
-    --local clientlist = awful.client.visible()
-
-    --block_timer:connect_signal("timeout", function () 
-        --for i,thisclient in pairs(clientlist) do 
-            ---- Move wiboxes to center of visible windows and populate hintindex
-            --local char = charorder:sub(i,i)
-            --hintindex[char] = thisclient
-            --hintbox[char].visible = true
-            --local geom = thisclient.geometry(thisclient)
-            --hintbox[char].x = geom.x + geom.width/2 - hintsize/2
-            --hintbox[char].y = geom.y + geom.height/2 - hintsize/2
-            --hintbox[char].screen = thisclient.screen
-        --end
-    --end)
-
-    --block_timer:start()
-
 function revelation.restore(t, zt)
     for scr=1, capi.screen.count() do
         awful.tag.history.restore(scr)
