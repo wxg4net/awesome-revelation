@@ -118,15 +118,13 @@ local function match_clients(rule, _clients, t, is_excluded)
         if mf(c, rule) then
             -- Store geometry before setting their tags
             clientData[c] = {}
-            if awful.client.floating.get(c) then
-                clientData[c]["geometry"] = c:geometry()
-                flt = awful.client.property.get(c, "floating")
-                if flt ~= nil then
-                    clientData[c]["floating"] = flt
-                    awful.client.property.set(c, "floating", false)
-                end
-
+            clientData[c]["geometry"] = c:geometry()
+            flt = awful.client.property.get(c, "floating")
+            if flt ~= nil then
+                clientData[c]["floating"] = flt
+                awful.client.property.set(c, "floating", false)
             end
+
 
             for k,v in pairs(revelation.property_to_watch) do
                 clientData[c][k] = c[k]
