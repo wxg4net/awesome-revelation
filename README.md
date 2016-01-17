@@ -9,10 +9,6 @@ It also have some features.
 
 **Now master branch works for both master and stable awesome WM**
 
-~~Master branch is only working with awesome master branch.~~
-
-~~For current stable version of awesome, 3.5.6, please checkout stable version~~
-
 ## Changes since 2015-09-26
 When all clients are exposing, you can zoom (__Modkey + Shift + hintbox charater__ or __right button__ of the mouse)
 or kill a client (__middle button__ of the mouse) and the position of hintboxes will be updated accordingly.
@@ -59,7 +55,7 @@ is_excluded=true})`.
 ![screenshot](./screenshot.png)
 
 
-## Use
+## Usage
 
 ### Installation
  (From user's awesome configuration directory, usually ~/.config/awesome)
@@ -71,7 +67,7 @@ is_excluded=true})`.
  2. Include it at the top of your rc.lua file:
     `local revelation=require("revelation")`
 
- 3. Add `revelation.init()` after `beautiful.init()`
+ 3. **Add `revelation.init()` after `beautiful.init()`**
 
  3. Define a global keybinding (e. g. `ModKey + e`) for revelation in your rc.lua:
 
