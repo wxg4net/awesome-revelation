@@ -67,7 +67,7 @@ is_excluded=true})`.
  2. Include it at the top of your rc.lua file:
     `local revelation=require("revelation")`
 
- 3. **Add `revelation.init()` after `beautiful.init()`**
+ 3. **Important: Add `revelation.init()` after `beautiful.init()`**
 
  3. Define a global keybinding (e. g. `ModKey + e`) for revelation in your rc.lua:
 
