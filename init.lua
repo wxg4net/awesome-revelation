@@ -73,6 +73,9 @@ local revelation = {
     curr_tag_only = false,
     font = "monospace 20",
     fg = beautiful.fg_normal or "#DCDCCC",
+    bg = beautiful.bg_normal or "#000000",
+    border_color=beautiful.border_focus or "#DCDCCC",
+    border_width=beautiful.border_width or 2,
     hintsize = (type(beautiful.xresources) == 'table' and beautiful.xresources.apply_dpi(50) or 60)
 }
 
@@ -441,16 +444,17 @@ function revelation.init(args)
 
     for i = 1, #revelation.charorder do
         local char = revelation.charorder:sub(i,i)
-        hintbox[char] = wibox({fg=beautiful.fg_normal, bg=beautiful.bg_focus, border_color=beautiful.border_focus, border_width=beautiful.border_width})
+        hintbox[char] = wibox({
+          fg=revelation.fg,
+          bg=revelation.bg,
+          border_color=revelation.border_color,
+          border_width=revelation.border_width
+        })
         hintbox[char].ontop = true
         hintbox[char].width = revelation.hintsize
         hintbox[char].height = revelation.hintsize
         letterbox[char] = wibox.widget.textbox()
-        letterbox[char]:set_markup(
-          "<span color=\"" .. revelation.fg .. "\"" .. ">" ..
-            char.upper(char) ..
-          "</span>"
-        )
+        letterbox[char]:set_markup(char.upper(char))
         letterbox[char]:set_font(revelation.font)
         letterbox[char]:set_align("center")
         hintbox[char]:set_widget(letterbox[char])
