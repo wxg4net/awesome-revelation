@@ -351,7 +351,8 @@ function revelation.expose_callback(t, zt, clientlist)
     local pressedMiddle = false
 
     capi.mousegrabber.run(function(mouse)
-        local c = awful.mouse.client_under_pointer()
+        --local c = capi.mouse.current_client or awful.mouse.client_under_pointer()
+        local c = capi.mouse.current_client
         local key_char = awful.util.table.hasitem(hintindex, c) 
         if mouse.buttons[1] == true then
             selectfn(restore, t, zt)(c)
